@@ -74,7 +74,7 @@ export function UuidTool() {
             readOnly
             value={single}
             aria-label="Generated UUID"
-            className="w-full rounded-md border border-zinc-300 bg-zinc-50 p-2.5 font-mono text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            className="w-full rounded-md border border-zinc-300 bg-zinc-50 p-2.5 font-mono text-base text-zinc-900 sm:text-sm dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
           />
           <CopyButton getText={() => single} />
         </div>
@@ -93,7 +93,7 @@ export function UuidTool() {
             max={MAX_BULK_COUNT}
             value={bulkCount}
             onChange={(e) => setBulkCount(Number(e.target.value))}
-            className="w-24 rounded-md border border-zinc-300 p-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-24 rounded-md border border-zinc-300 p-1.5 text-base sm:text-sm dark:border-zinc-700 dark:bg-zinc-900"
           />
           <button
             type="button"
@@ -117,7 +117,7 @@ export function UuidTool() {
               rows={10}
               aria-label="Bulk generated UUIDs"
               spellCheck={false}
-              className="w-full rounded-md border border-zinc-300 bg-zinc-50 p-3 font-mono text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+              className="w-full rounded-md border border-zinc-300 bg-zinc-50 p-3 font-mono text-base text-zinc-900 sm:text-sm dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
             />
           </div>
         )}
@@ -133,7 +133,7 @@ export function UuidTool() {
           value={validatorInput}
           onChange={(e) => setValidatorInput(e.target.value)}
           placeholder="Paste a UUID to validate…"
-          className="w-full rounded-md border border-zinc-300 p-2.5 font-mono text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          className="w-full rounded-md border border-zinc-300 p-2.5 font-mono text-base sm:text-sm dark:border-zinc-700 dark:bg-zinc-900"
         />
         {validation && (
           <p role="status" className={validation.valid ? "text-sm text-emerald-600 dark:text-emerald-400" : "text-sm text-red-600 dark:text-red-400"}>

@@ -82,7 +82,7 @@ export function Base64Tool() {
           placeholder={mode === "encode" ? "Type or paste text to encode…" : "Paste Base64 to decode…"}
           rows={8}
           spellCheck={false}
-          className="w-full rounded-md border border-zinc-300 bg-white p-3 font-mono text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+          className="w-full rounded-md border border-zinc-300 bg-white p-3 font-mono text-base text-zinc-900 outline-none focus:border-zinc-500 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
         />
       </div>
 
@@ -100,7 +100,7 @@ export function Base64Tool() {
           rows={8}
           spellCheck={false}
           aria-invalid={result.error ? "true" : "false"}
-          className="w-full rounded-md border border-zinc-300 bg-zinc-50 p-3 font-mono text-sm text-zinc-900 outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+          className="w-full rounded-md border border-zinc-300 bg-zinc-50 p-3 font-mono text-base text-zinc-900 outline-none sm:text-sm dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
         />
         {result.error && (
           <p role="alert" className="text-sm text-red-600 dark:text-red-400">

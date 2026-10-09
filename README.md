@@ -1,4 +1,4 @@
-# DevToolBox
+# DevRivet
 
 A free, fast, browser-based collection of developer utilities. No sign-up, no login, no database, no server-side processing of your data.
 
@@ -62,9 +62,11 @@ src/
   lib/                 Pure tool logic + unit tests (base64, uuid, sql-format, cron)
 ```
 
-`src/lib/site-config.ts` centralizes `SITE_NAME`, `SITE_URL`, `SITE_DESCRIPTION`, and the tool registry — update it in one place when the final brand name/domain is decided.
+`src/lib/site-config.ts` centralizes `SITE_NAME` (now `DevRivet`), `SITE_URL`, `SITE_DESCRIPTION`, and the tool registry — update it in one place for any future brand/domain change.
 
 ## Known issues
 
+- **`SITE_URL` is still a placeholder** (`https://example.com`) — the real domain (`devrivet.com`) is not yet purchased/connected. Update `SITE_URL` in `src/lib/site-config.ts` once it is; this is the only place it's defined, so canonical URLs, sitemap, robots, and JSON-LD all pick it up automatically. **Blocker for production launch.**
+- **Contact email is still a placeholder** (`contact@example.com` in `src/app/contact/page.tsx`) — update to a real `@devrivet.com` address once the domain is confirmed. **Blocker for production launch.**
 - `npm audit` reports 5 high-severity advisories in `braces`/`micromatch`/`fast-glob`, pulled in transitively by `eslint-config-next`. This is a **dev-only lint tooling** dependency chain (not part of the production bundle) and the advisory requires attacker-controlled glob patterns, which doesn't apply to our lint usage. No non-breaking fix is currently published upstream; revisit when `eslint-config-next` releases an update.
-- Next.js has an out-of-band security update announced for 2026-10-14 (two Critical, one High severity, in upstream dependencies). This project was built on the then-latest `16.4.0`, which already includes fixes for CVE-2026-75604 (Windows path traversal RCE) and CVE-2026-44580 (XSS). Re-check `npm view next dist-tags` after that date and upgrade.
+- Next.js has an out-of-band security update announced for 2026-10-14 (two Critical, one High severity, in upstream dependencies). This project stays on `16.4.0` (the then-latest), which already includes fixes for CVE-2026-75604 (Windows path traversal RCE) and CVE-2026-44580 (XSS). **TODO: Re-check official Next.js security update on or after 2026-10-14 before production launch.**

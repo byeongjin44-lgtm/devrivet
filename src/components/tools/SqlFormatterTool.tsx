@@ -50,7 +50,7 @@ export function SqlFormatterTool() {
             id="sql-dialect"
             value={dialect}
             onChange={(e) => setDialect(e.target.value as SqlDialect)}
-            className="rounded-md border border-zinc-300 bg-white p-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded-md border border-zinc-300 bg-white p-1.5 text-base sm:text-sm dark:border-zinc-700 dark:bg-zinc-900"
           >
             {SQL_DIALECTS.map((d) => (
               <option key={d.value} value={d.value}>
@@ -67,7 +67,7 @@ export function SqlFormatterTool() {
             id="sql-case"
             value={keywordCase}
             onChange={(e) => setKeywordCase(e.target.value as KeywordCase)}
-            className="rounded-md border border-zinc-300 bg-white p-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded-md border border-zinc-300 bg-white p-1.5 text-base sm:text-sm dark:border-zinc-700 dark:bg-zinc-900"
           >
             <option value="upper">UPPERCASE</option>
             <option value="lower">lowercase</option>
@@ -109,7 +109,7 @@ export function SqlFormatterTool() {
           placeholder="Paste a SQL query to format…"
           rows={10}
           spellCheck={false}
-          className="w-full rounded-md border border-zinc-300 bg-white p-3 font-mono text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+          className="w-full rounded-md border border-zinc-300 bg-white p-3 font-mono text-base text-zinc-900 outline-none focus:border-zinc-500 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
         />
       </div>
 
@@ -126,7 +126,7 @@ export function SqlFormatterTool() {
           readOnly
           rows={12}
           spellCheck={false}
-          className="w-full rounded-md border border-zinc-300 bg-zinc-50 p-3 font-mono text-sm text-zinc-900 outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+          className="w-full rounded-md border border-zinc-300 bg-zinc-50 p-3 font-mono text-base text-zinc-900 outline-none sm:text-sm dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
         />
         {error && (
           <p role="alert" className="text-sm text-red-600 dark:text-red-400">

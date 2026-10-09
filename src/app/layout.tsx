@@ -22,6 +22,7 @@ export const metadata: Metadata = {
     template: `%s`,
   },
   description: SITE_DESCRIPTION,
+  alternates: { canonical: "/" },
   openGraph: {
     siteName: SITE_NAME,
     type: "website",

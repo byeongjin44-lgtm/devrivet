@@ -105,7 +105,7 @@ export function CronTool() {
                 value={fields[f.key]}
                 placeholder={f.placeholder}
                 onChange={(e) => handleFieldChange(f.key, e.target.value)}
-                className="rounded-md border border-zinc-300 p-2 font-mono text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                className="rounded-md border border-zinc-300 p-2 font-mono text-base sm:text-sm dark:border-zinc-700 dark:bg-zinc-900"
               />
             </div>
           ))}
@@ -132,7 +132,7 @@ export function CronTool() {
             value={expression}
             onChange={(e) => setExpression(e.target.value)}
             spellCheck={false}
-            className="w-full rounded-md border border-zinc-300 bg-white p-2.5 font-mono text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-full rounded-md border border-zinc-300 bg-white p-2.5 font-mono text-base sm:text-sm dark:border-zinc-700 dark:bg-zinc-900"
           />
           <CopyButton getText={() => expression} />
         </div>
@@ -159,7 +159,7 @@ export function CronTool() {
               <select
                 value={nextRunCount}
                 onChange={(e) => setNextRunCount(Number(e.target.value))}
-                className="rounded-md border border-zinc-300 p-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                className="rounded-md border border-zinc-300 p-1 text-base sm:text-sm dark:border-zinc-700 dark:bg-zinc-900"
               >
                 {[5, 10].map((n) => (
                   <option key={n} value={n}>

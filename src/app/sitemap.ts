@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL, TOOLS } from "@/lib/site-config";
 
+// Required by `output: "export"` so sitemap.xml is generated once at build time.
+export const dynamic = "force-static";
+
 const STATIC_PATHS = ["/", "/about", "/privacy", "/terms", "/contact"];
 
 export default function sitemap(): MetadataRoute.Sitemap {

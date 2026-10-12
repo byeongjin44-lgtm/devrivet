@@ -12,28 +12,37 @@ This project is a Developer Tools–only website aimed at:
 - Local, in-browser processing for all tool logic
 - Low server/hosting cost (fully static where possible)
 - Future Google AdSense monetization
-- Continued expansion with more developer tools (never unrelated categories)
+- Developer tools only (never unrelated categories)
 
-## Current tools (MVP)
+## Current tools
 
 - **Base64 Encoder / Decoder** — `/base64`
 - **UUID Generator** (v4 / v7, bulk, validator) — `/uuid-generator`
 - **SQL Formatter** (Standard SQL, MySQL, PostgreSQL, SQL Server, SQLite) — `/sql-formatter`
 - **Cron Expression Generator** (builder, explain, validate, next runs) — `/cron-generator`
+- **JSON Formatter / Validator** (format, minify, validate) — `/json-formatter`
+- **URL Encoder / Decoder** (query/component encoding) — `/url-encoder`
+- **Unix Timestamp Converter** (timestamp ↔ date, UTC/local) — `/timestamp-converter`
+- **JWT Decoder** (header/payload decode, no signature verification) — `/jwt-decoder`
+- **Regex Tester** (JavaScript RegExp: matches, indexes, capture groups, highlighting) — `/regex-tester`
+- **Hash Generator** (SHA-256 / SHA-384 / SHA-512 / SHA-1 via Web Crypto) — `/hash-generator`
 
-## Planned future tools
+10 tools in total, grouped on the homepage and in the header Tools menu by the `category` field in `src/lib/site-config.ts`.
 
-JSON Formatter, Timestamp Converter, JWT Decoder, Regex Tester, and other developer utilities. Each new tool stays within the Developer Tools category — no timers, image tools, barcode tools, or calculators on this site (those would be separate, dedicated sites).
+## Feature scope (v1 locked)
+
+The DevRivet v1 feature set is locked at the 10 tools above until real production traffic data is available. No new tools until then. Any future tool must stay within the Developer Tools category — no timers, image tools, barcode tools, or calculators on this site (those would be separate, dedicated sites).
 
 ## Privacy principle
 
-All tool input (text, SQL, UUIDs, cron expressions) is processed locally in the browser. Nothing you type into a tool is intentionally sent to or stored on a server. See `/privacy` for the full policy.
+All tool input (text, SQL, UUIDs, JSON, URLs, timestamps, tokens, regex patterns, text to hash, etc.) is processed locally in the browser. Nothing you type into a tool is intentionally sent to or stored on a server. See `/privacy` for the full policy.
 
 ## Tech stack
 
 - Next.js 16.4.0 (App Router, TypeScript, Turbopack)
 - Tailwind CSS v4
 - `uuid`, `sql-formatter`, `cron-parser`, `cronstrue`
+- Browser built-ins (no extra dependencies) for JSON, URL, timestamp, JWT, regex (`RegExp`) and hashing (Web Crypto `crypto.subtle`)
 - Vitest for unit tests
 
 Each tool's library is only imported by that tool's page/component, so route-based code splitting keeps the homepage bundle free of SQL/cron/UUID formatting code.
@@ -57,9 +66,9 @@ Requires Node.js 20.9+ (the minimum supported by Next.js 16); this project was b
 src/
   app/                 Routes (App Router): home, tool pages, policy pages, sitemap, robots
   components/
-    layout/            Header, Footer, Container, ToolPageLayout
+    layout/            Header, ToolsMenu, Footer, Container, ToolPageLayout
     tools/             Client-side interactive tool components
-  lib/                 Pure tool logic + unit tests (base64, uuid, sql-format, cron)
+  lib/                 Pure tool logic + unit tests (one `<tool>.ts` + `<tool>.test.ts` per tool)
 ```
 
 `src/lib/site-config.ts` centralizes `SITE_NAME` (now `DevRivet`), `SITE_URL`, `SITE_DESCRIPTION`, and the tool registry — update it in one place for any future brand/domain change.

@@ -4,10 +4,11 @@ Guidance for Claude Code (and any other agent) working in this repository.
 
 ## What this project is
 
-This project is DevRivet, a global browser-based Developer Tools website. Base64 encoder/decoder, UUID generator, SQL formatter, cron expression generator today; more developer utilities (JSON formatter, timestamp converter, JWT decoder, regex tester, etc.) later.
+This project is DevRivet, a global browser-based Developer Tools website. Current tools (10): Base64 encoder/decoder, UUID generator, SQL formatter, cron expression generator, JSON formatter/validator, URL encoder/decoder, Unix timestamp converter, JWT decoder, regex tester, hash generator.
 
 ## Hard rules — do not violate
 
+- **DevRivet v1 feature set is locked at 10 tools until real production traffic data is available.** Do not add new tools (or new features to existing tools) before production traffic data shows real demand. If asked to, flag this rule first.
 - **Developer Tools category only.** Never add timers, image/barcode tools, calculators, or any other non-developer-tool category to this site. Those are separate future projects.
 - **No auth, no accounts, no login.**
 - **No database.**
@@ -24,7 +25,7 @@ This project is DevRivet, a global browser-based Developer Tools website. Base64
 - Every tool page is a Server Component that renders metadata + `ToolPageLayout`, wrapping a `"use client"` tool component for the actual interactive bits. Keep the client boundary as small as possible.
 - A tool's third-party library (e.g. `sql-formatter`, `cron-parser`) should only be imported from that tool's `lib`/`component` files, so Next.js route-based code splitting keeps it out of the homepage and other tools' bundles. Don't import a tool-specific library from a shared/layout file.
 - Site identity (`SITE_NAME` = "DevRivet", `SITE_URL`, `SITE_DESCRIPTION`) and the tool registry live in `src/lib/site-config.ts`. Update there, not by hardcoding strings in pages. `SITE_URL` is currently a placeholder (`https://example.com`) until the real domain is connected — every page already reads it from this one config, so don't hardcode a URL anywhere else.
-- New tool pages need: unique `title`/`description`/canonical metadata, an entry in `TOOLS` in `site-config.ts` (this drives the homepage card, nav link, and sitemap), a short "What is X / How to use / Example / FAQ" content section (real, useful content — not SEO filler), and a `PrivacyNote` / local-processing notice if it processes user input.
+- New tool pages need: unique `title`/`description`/canonical metadata, an entry in `TOOLS` in `site-config.ts` with a `category` from `TOOL_CATEGORIES` (this drives the grouped homepage cards, the header Tools menu, and the sitemap), a short "What is X / How to use / Example / FAQ" content section (real, useful content — not SEO filler), and a `PrivacyNote` / local-processing notice if it processes user input.
 - `next.config.ts` intentionally does **not** enable Cache Components / Partial Prerendering — this site is a static shell around client-interactive tools, and that feature adds prerendering complexity (no `new Date()`/`Math.random()` during static render, etc.) with no benefit here. Don't re-enable it without a concrete reason.
 - Keep tool-specific dependencies minimal and only add a library when it's clearly the standard choice for that tool (e.g. `uuid`, `sql-formatter`, `cron-parser` + `cronstrue`).
 

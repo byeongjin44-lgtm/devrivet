@@ -16,8 +16,7 @@ export default function PrivacyPage() {
 
       <h2 className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Tool input</h2>
       <p>
-        The text, SQL, UUIDs, and cron expressions you enter into our tools are processed locally in
-        your browser whenever technically possible. This input is not intentionally transmitted to or
+        Tool inputs are processed locally in your browser and are not intentionally transmitted to or
         stored on our servers.
       </p>
 
@@ -29,6 +28,8 @@ export default function PrivacyPage() {
       <h2 className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
         Analytics and advertising
       </h2>
+      {/* TODO(analytics): Cloudflare Web Analytics is planned but NOT enabled yet (see ANALYTICS.md).
+          When it is actually switched on, update this section to disclose it and what it collects. */}
       <p>
         We do not currently run analytics or advertising on this site. If we enable these in the future
         (for example, Google AdSense), this policy will be updated beforehand to describe what data is

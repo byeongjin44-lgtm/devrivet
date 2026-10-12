@@ -43,12 +43,24 @@ export function UuidTool() {
             {(["v4", "v7"] as const).map((v) => (
               <label
                 key={v}
-                className={`cursor-pointer rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
+                className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
                   version === v
                     ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-50 dark:bg-zinc-50 dark:text-zinc-900"
                     : "border-zinc-300 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
                 }`}
               >
+                <span
+                  aria-hidden="true"
+                  className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border-2 ${
+                    version === v
+                      ? "border-white dark:border-zinc-900"
+                      : "border-zinc-400 dark:border-zinc-500"
+                  }`}
+                >
+                  {version === v && (
+                    <span className="h-1.5 w-1.5 rounded-full bg-white dark:bg-zinc-900" />
+                  )}
+                </span>
                 <input
                   type="radio"
                   name="uuid-version"
@@ -64,7 +76,7 @@ export function UuidTool() {
           <button
             type="button"
             onClick={handleGenerate}
-            className="rounded-md bg-zinc-900 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+            className="rounded-md bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
           >
             Generate
           </button>
@@ -103,6 +115,11 @@ export function UuidTool() {
             Generate Bulk
           </button>
         </div>
+        {bulkCount > MAX_BULK_COUNT && (
+          <p role="alert" className="text-sm text-amber-600 dark:text-amber-400">
+            Maximum is {MAX_BULK_COUNT} UUIDs per batch — only {MAX_BULK_COUNT} will be generated.
+          </p>
+        )}
         {bulkResult.length > 0 && (
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">

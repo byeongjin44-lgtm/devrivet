@@ -1,7 +1,7 @@
 import { Container } from "@/components/layout/Container";
 import { JsonLd } from "@/components/JsonLd";
 import { ToolCard } from "@/components/ToolCard";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL, TOOLS } from "@/lib/site-config";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL, TOOL_GROUPS } from "@/lib/site-config";
 
 export default function Home() {
   return (
@@ -21,11 +21,18 @@ export default function Home() {
         </h1>
         <p className="max-w-2xl text-zinc-600 dark:text-zinc-400">{SITE_TAGLINE}</p>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {TOOLS.map((tool) => (
-          <ToolCard key={tool.slug} tool={tool} />
-        ))}
-      </div>
+      {TOOL_GROUPS.map((group) => (
+        <section key={group.category} className="flex flex-col gap-4">
+          <h2 className="text-sm font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
+            {group.category}
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {group.tools.map((tool) => (
+              <ToolCard key={tool.slug} tool={tool} />
+            ))}
+          </div>
+        </section>
+      ))}
     </Container>
   );
 }

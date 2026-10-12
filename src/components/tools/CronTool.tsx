@@ -175,7 +175,16 @@ export function CronTool() {
           <ol className="flex flex-col gap-1 font-mono text-sm text-zinc-800 dark:text-zinc-200">
             {nextRuns.map((run, i) => (
               <li key={i} className="rounded-md bg-zinc-50 px-3 py-1.5 dark:bg-zinc-950">
-                {run.toLocaleString(undefined, { timeZone: timezone })}
+                {run.toLocaleString("en-US", {
+                  timeZone: timezone,
+                  weekday: "short",
+                  year: "numeric",
+                  month: "short",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                })}
               </li>
             ))}
           </ol>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import {
   CRON_PRESETS,
   DEFAULT_CRON_FIELDS,
@@ -12,14 +12,20 @@ import {
 } from "@/lib/cron";
 import { CopyButton } from "@/components/CopyButton";
 
-function useLocalTimezone() {
-  return useMemo(() => {
-    try {
-      return Intl.DateTimeFormat().resolvedOptions().timeZone;
-    } catch {
-      return "UTC";
-    }
-  }, []);
+function getBrowserTimezone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return "UTC";
+  }
+}
+
+const noopSubscribe = () => () => {};
+
+// null in the static HTML and during hydration, the browser timezone right after. Keeps the
+// prerendered markup independent of the build machine's timezone and clock (no hydration mismatch).
+function useLocalTimezone(): string | null {
+  return useSyncExternalStore(noopSubscribe, getBrowserTimezone, () => null);
 }
 
 const FIELD_CONFIG: { key: keyof CronFields; label: string; placeholder: string }[] = [
@@ -67,8 +73,9 @@ export function CronTool() {
     }
   }, [expression, validation]);
 
+  // Next runs depend on the current time, so they are only computed in the browser (timezone known).
   const nextRuns = useMemo(() => {
-    if (!validation?.valid) return [];
+    if (!validation?.valid || timezone === null) return [];
     try {
       return getNextRuns(expression, nextRunCount, timezone);
     } catch {
@@ -170,10 +177,15 @@ export function CronTool() {
             </label>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Times shown in your local timezone: {timezone}
+            Times shown in your local timezone: {timezone ?? "—"}
           </p>
           <ol className="flex flex-col gap-1 font-mono text-sm text-zinc-800 dark:text-zinc-200">
-            {nextRuns.map((run, i) => (
+            {timezone === null && (
+              <li className="rounded-md bg-zinc-50 px-3 py-1.5 text-zinc-500 dark:bg-zinc-950 dark:text-zinc-400">
+                Loading…
+              </li>
+            )}
+            {timezone !== null && nextRuns.map((run, i) => (
               <li key={i} className="rounded-md bg-zinc-50 px-3 py-1.5 dark:bg-zinc-950">
                 {run.toLocaleString("en-US", {
                   timeZone: timezone,

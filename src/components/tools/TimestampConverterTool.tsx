@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import {
   TimestampError,
   type TimestampUnit,
@@ -16,14 +16,20 @@ import { CopyButton } from "@/components/CopyButton";
 
 type UnitChoice = "auto" | TimestampUnit;
 
-function useLocalTimezone() {
-  return useMemo(() => {
-    try {
-      return Intl.DateTimeFormat().resolvedOptions().timeZone;
-    } catch {
-      return "UTC";
-    }
-  }, []);
+function getBrowserTimezone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return "UTC";
+  }
+}
+
+const noopSubscribe = () => () => {};
+
+// null in the static HTML and during hydration, the browser timezone right after. Keeps the
+// prerendered markup independent of the build machine's timezone (no hydration mismatch).
+function useLocalTimezone(): string | null {
+  return useSyncExternalStore(noopSubscribe, getBrowserTimezone, () => null);
 }
 
 function toDateTimeLocalValue(date: Date): string {
@@ -34,7 +40,14 @@ function toDateTimeLocalValue(date: Date): string {
 export function TimestampConverterTool() {
   const timezone = useLocalTimezone();
 
-  const [now, setNow] = useState(() => getCurrentTimestamp());
+  // Current-time defaults are only shown once mounted in the browser, so the static HTML never bakes in
+  // the build time. mountedAt is still captured once per mount; it just isn't rendered before then.
+  const isClient = useSyncExternalStore(noopSubscribe, () => true, () => false);
+  const [mountedAt] = useState(() => new Date());
+  const [refreshedNow, setNow] = useState<{ seconds: number; milliseconds: number } | null>(null);
+  const now = refreshedNow ?? (isClient ? dateToTimestamp(mountedAt) : null);
+  const [editedDateInput, setDateInput] = useState<string | null>(null);
+  const dateInput = editedDateInput ?? (isClient ? toDateTimeLocalValue(mountedAt) : null);
 
   const [tsInput, setTsInput] = useState("");
   const [unitChoice, setUnitChoice] = useState<UnitChoice>("auto");
@@ -49,9 +62,8 @@ export function TimestampConverterTool() {
     }
   }, [tsInput, effectiveUnit]);
 
-  const [dateInput, setDateInput] = useState(() => toDateTimeLocalValue(new Date()));
-
   const dateResult = useMemo(() => {
+    if (dateInput === null) return { date: null as Date | null, error: null as string | null };
     try {
       return { date: parseLocalDateTimeInput(dateInput), error: null as string | null };
     } catch (err) {
@@ -60,6 +72,7 @@ export function TimestampConverterTool() {
   }, [dateInput]);
 
   const dateTimestamp = dateResult.date ? dateToTimestamp(dateResult.date) : null;
+  const localText = tsResult.date && timezone ? `${formatLocal(tsResult.date, timezone)} (${timezone})` : "—";
 
   return (
     <div className="flex flex-col gap-10">
@@ -70,21 +83,21 @@ export function TimestampConverterTool() {
             <span className="w-24 shrink-0 text-sm text-zinc-500 sm:w-28 dark:text-zinc-400">Seconds</span>
             <input
               readOnly
-              value={now.seconds}
+              value={now ? now.seconds : "—"}
               aria-label="Current Unix timestamp in seconds"
               className="w-40 min-w-0 rounded-md border border-zinc-300 bg-zinc-50 p-2 font-mono text-base sm:text-sm dark:border-zinc-700 dark:bg-zinc-950"
             />
-            <CopyButton getText={() => String(now.seconds)} />
+            <CopyButton getText={() => String(now?.seconds ?? "")} disabled={!now} />
           </div>
           <div className="flex items-center gap-2">
             <span className="w-24 shrink-0 text-sm text-zinc-500 sm:w-28 dark:text-zinc-400">Milliseconds</span>
             <input
               readOnly
-              value={now.milliseconds}
+              value={now ? now.milliseconds : "—"}
               aria-label="Current Unix timestamp in milliseconds"
               className="w-40 min-w-0 rounded-md border border-zinc-300 bg-zinc-50 p-2 font-mono text-base sm:text-sm dark:border-zinc-700 dark:bg-zinc-950"
             />
-            <CopyButton getText={() => String(now.milliseconds)} />
+            <CopyButton getText={() => String(now?.milliseconds ?? "")} disabled={!now} />
           </div>
           <button
             type="button"
@@ -162,11 +175,11 @@ export function TimestampConverterTool() {
               <span className="w-16 text-sm text-zinc-500 dark:text-zinc-400">Local</span>
               <input
                 readOnly
-                value={`${formatLocal(tsResult.date, timezone)} (${timezone})`}
+                value={localText}
                 aria-label="Date in browser local time"
                 className="w-full max-w-sm rounded-md border border-zinc-300 bg-zinc-50 p-2 font-mono text-base sm:text-sm dark:border-zinc-700 dark:bg-zinc-950"
               />
-              <CopyButton getText={() => `${formatLocal(tsResult.date!, timezone)} (${timezone})`} />
+              <CopyButton getText={() => localText} />
             </div>
           </div>
         )}
@@ -181,12 +194,12 @@ export function TimestampConverterTool() {
           id="date-input"
           type="datetime-local"
           step={1}
-          value={dateInput}
+          value={dateInput ?? ""}
           onChange={(e) => setDateInput(e.target.value)}
           className="w-64 rounded-md border border-zinc-300 p-2 font-mono text-base sm:text-sm dark:border-zinc-700 dark:bg-zinc-900"
         />
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          Interpreted in your browser&apos;s local timezone: {timezone}
+          Interpreted in your browser&apos;s local timezone: {timezone ?? "—"}
         </p>
 
         {dateResult.error && (

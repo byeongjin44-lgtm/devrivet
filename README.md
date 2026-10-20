@@ -39,7 +39,7 @@ All tool input (text, SQL, UUIDs, JSON, URLs, timestamps, tokens, regex patterns
 
 ## Tech stack
 
-- Next.js 16.4.0 (App Router, TypeScript, Turbopack)
+- Next.js 16.4.1 (App Router, TypeScript, Turbopack)
 - Tailwind CSS v4
 - `uuid`, `sql-formatter`, `cron-parser`, `cronstrue`
 - Browser built-ins (no extra dependencies) for JSON, URL, timestamp, JWT, regex (`RegExp`) and hashing (Web Crypto `crypto.subtle`)
@@ -75,7 +75,6 @@ src/
 
 ## Known issues
 
-- **`SITE_URL` is still a placeholder** (`https://example.com`) — the real domain (`devrivet.com`) is not yet purchased/connected. Update `SITE_URL` in `src/lib/site-config.ts` once it is; this is the only place it's defined, so canonical URLs, sitemap, robots, and JSON-LD all pick it up automatically. **Blocker for production launch.**
-- **Contact email is still a placeholder** (`contact@example.com` in `src/app/contact/page.tsx`) — update to a real `@devrivet.com` address once the domain is confirmed. **Blocker for production launch.**
+- **Contact email is still a placeholder** (`contact@example.com` in `src/app/contact/page.tsx`) — update to a real `@devrivettools.com` address once mail receiving is set up. **Blocker for production launch.**
 - `npm audit` reports 5 high-severity advisories in `braces`/`micromatch`/`fast-glob`, pulled in transitively by `eslint-config-next`. This is a **dev-only lint tooling** dependency chain (not part of the production bundle) and the advisory requires attacker-controlled glob patterns, which doesn't apply to our lint usage. No non-breaking fix is currently published upstream; revisit when `eslint-config-next` releases an update.
-- Next.js has an out-of-band security update announced for 2026-10-14 (two Critical, one High severity, in upstream dependencies). This project stays on `16.4.0` (the then-latest), which already includes fixes for CVE-2026-75604 (Windows path traversal RCE) and CVE-2026-44580 (XSS). **TODO: Re-check official Next.js security update on or after 2026-10-14 before production launch.**
+- Next.js is pinned to `16.4.1`, the 2026-10-14 security release that fixes GHSA-673q-mjm6-r5xr and GHSA-2464-fhr4-w9xw (Critical) and GHSA-p3m5-59mp-jv5r (High). Before any future Next.js upgrade, check the official security advisories and release notes first.

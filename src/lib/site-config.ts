@@ -1,5 +1,5 @@
 export const SITE_NAME = "DevRivet";
-export const SITE_URL = "https://example.com";
+export const SITE_URL = "https://devrivettools.com";
 export const SITE_TITLE = `${SITE_NAME} — Free Online Developer Tools`;
 export const SITE_DESCRIPTION =
   "10 free developer tools that run in your browser: JSON and SQL formatters, Base64, URL and JWT decoders, UUID, hash, regex, cron and timestamp tools. No sign-up.";

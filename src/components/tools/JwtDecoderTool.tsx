@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { JwtError, decodeJwt, extractTimeClaims, isExpired } from "@/lib/jwt";
 import { CopyButton } from "@/components/CopyButton";
 
-const SAMPLE_JWT =
+export const SAMPLE_JWT =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
 
 export function JwtDecoderTool() {

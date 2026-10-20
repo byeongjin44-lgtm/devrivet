@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site-config";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site-config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,11 +18,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — Free Online Developer Tools`,
+    default: SITE_TITLE,
     template: `%s`,
   },
   description: SITE_DESCRIPTION,
-  alternates: { canonical: "/" },
+  // No canonical here: it would be inherited by every page that doesn't set its own (e.g. the
+  // 404 page). Each page declares its own self-referencing canonical instead.
   openGraph: {
     siteName: SITE_NAME,
     type: "website",

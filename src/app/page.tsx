@@ -1,7 +1,10 @@
 import { Container } from "@/components/layout/Container";
 import { JsonLd } from "@/components/JsonLd";
 import { ToolCard } from "@/components/ToolCard";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL, TOOL_GROUPS } from "@/lib/site-config";
+import { pageMetadata } from "@/lib/page-metadata";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL, TOOLS, TOOL_GROUPS } from "@/lib/site-config";
+
+export const metadata = pageMetadata({ title: SITE_TITLE, description: SITE_DESCRIPTION, path: "/" });
 
 export default function Home() {
   return (
@@ -17,9 +20,13 @@ export default function Home() {
       />
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">
-          {SITE_NAME}
+          Free developer tools that run in your browser
         </h1>
-        <p className="max-w-2xl text-zinc-600 dark:text-zinc-400">{SITE_TAGLINE}</p>
+        <p className="max-w-2xl text-zinc-600 dark:text-zinc-400">
+          {SITE_NAME} has {TOOLS.length} fast, focused tools for everyday development work — formatting,
+          encoding and decoding, hashing, testing and scheduling. No sign-up required, and your input is
+          processed locally in your browser.
+        </p>
       </div>
       {TOOL_GROUPS.map((group) => (
         <section key={group.category} className="flex flex-col gap-4">

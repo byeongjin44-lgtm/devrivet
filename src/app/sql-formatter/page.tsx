@@ -1,20 +1,30 @@
-import type { Metadata } from "next";
 import { ToolPageLayout } from "@/components/layout/ToolPageLayout";
 import { SqlFormatterTool } from "@/components/tools/SqlFormatterTool";
-import { SITE_URL, TOOLS } from "@/lib/site-config";
+import { toolMetadata } from "@/lib/page-metadata";
+import { TOOLS } from "@/lib/site-config";
 
 const tool = TOOLS.find((t) => t.slug === "sql-formatter")!;
 
-export const metadata: Metadata = {
-  title: tool.title,
-  description: tool.metaDescription,
-  alternates: { canonical: `${SITE_URL}${tool.path}` },
-  openGraph: {
-    title: tool.title,
-    description: tool.metaDescription,
-    url: `${SITE_URL}${tool.path}`,
-  },
-};
+// Output is the formatter's actual result for this input (verified in src/app/seo.test.tsx).
+const SQL_EXAMPLE_INPUT =
+  "select u.id,u.name,count(o.id) as order_count from users u left join orders o on u.id=o.user_id where u.active=1 and o.created_at>='2026-01-01' group by u.id,u.name order by order_count desc;";
+const SQL_EXAMPLE_OUTPUT = `SELECT
+  u.id,
+  u.name,
+  count(o.id) AS order_count
+FROM
+  users u
+  LEFT JOIN orders o ON u.id = o.user_id
+WHERE
+  u.active = 1
+  AND o.created_at >= '2026-01-01'
+GROUP BY
+  u.id,
+  u.name
+ORDER BY
+  order_count DESC;`;
+
+export const metadata = toolMetadata(tool);
 
 export default function SqlFormatterPage() {
   return (
@@ -47,6 +57,31 @@ export default function SqlFormatterPage() {
               casts or SQL Server&apos;s{" "}
               <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">TOP</code>{" "}
               clause is handled correctly.
+            </p>
+            <p className="mt-2">
+              The <strong>Keyword case</strong> option controls how SQL keywords such as{" "}
+              <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">SELECT</code>,{" "}
+              <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">LEFT JOIN</code> and{" "}
+              <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">GROUP BY</code> are
+              written: UPPERCASE (the default) or lowercase. Table names, column names and function calls like{" "}
+              <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">count()</code> keep the
+              casing you typed.
+            </p>
+          </section>
+          <section>
+            <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Example</h2>
+            <p>This single-line query with a join, filter, grouping and sort:</p>
+            <pre className="mt-2 overflow-x-auto rounded-md bg-zinc-100 p-3 font-mono text-xs dark:bg-zinc-800">
+              {SQL_EXAMPLE_INPUT}
+            </pre>
+            <p className="mt-2">is formatted with the Standard SQL dialect and UPPERCASE keywords as:</p>
+            <pre className="mt-2 overflow-x-auto rounded-md bg-zinc-100 p-3 font-mono text-xs dark:bg-zinc-800">
+              {SQL_EXAMPLE_OUTPUT}
+            </pre>
+            <p className="mt-2">
+              Each clause starts on its own line, the selected columns and grouped columns are listed one per
+              line, and the second <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">WHERE</code>{" "}
+              condition is moved onto its own <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">AND</code> line.
             </p>
           </section>
           <section>

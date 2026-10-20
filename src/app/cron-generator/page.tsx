@@ -1,20 +1,11 @@
-import type { Metadata } from "next";
 import { ToolPageLayout } from "@/components/layout/ToolPageLayout";
 import { CronTool } from "@/components/tools/CronTool";
-import { SITE_URL, TOOLS } from "@/lib/site-config";
+import { toolMetadata } from "@/lib/page-metadata";
+import { TOOLS } from "@/lib/site-config";
 
 const tool = TOOLS.find((t) => t.slug === "cron-generator")!;
 
-export const metadata: Metadata = {
-  title: tool.title,
-  description: tool.metaDescription,
-  alternates: { canonical: `${SITE_URL}${tool.path}` },
-  openGraph: {
-    title: tool.title,
-    description: tool.metaDescription,
-    url: `${SITE_URL}${tool.path}`,
-  },
-};
+export const metadata = toolMetadata(tool);
 
 export default function CronGeneratorPage() {
   return (
@@ -55,6 +46,21 @@ export default function CronGeneratorPage() {
               <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">0 9 * * 1-5</code>{" "}
               means &quot;every weekday at 9:00 AM&quot;.
             </p>
+            <ul className="mt-2 flex list-disc flex-col gap-1 pl-5">
+              <li>
+                <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">*/5 * * * *</code> —
+                every 5 minutes (minute 0, 5, 10, … of every hour).
+              </li>
+              <li>
+                <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">30 2 1 * *</code> — at
+                2:30 AM on the 1st day of every month, a common slot for monthly maintenance jobs.
+              </li>
+              <li>
+                <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">0 0 * * 0</code> — at
+                midnight every Sunday. In the day-of-week field, 0 is Sunday and 6 is Saturday (7 is also
+                accepted as Sunday).
+              </li>
+            </ul>
           </section>
           <section>
             <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">FAQ</h2>

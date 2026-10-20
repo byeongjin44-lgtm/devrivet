@@ -93,7 +93,7 @@ export function UuidTool() {
       </section>
 
       <section className="flex flex-col gap-3 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Bulk Generator</h3>
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Bulk Generator</h2>
         <div className="flex flex-wrap items-center gap-2">
           <label htmlFor="bulk-count" className="text-sm text-zinc-600 dark:text-zinc-400">
             Count (1–{MAX_BULK_COUNT})
@@ -141,7 +141,7 @@ export function UuidTool() {
       </section>
 
       <section className="flex flex-col gap-3 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Validator</h3>
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Validator</h2>
         <label htmlFor="uuid-validate-input" className="sr-only">
           UUID to validate
         </label>

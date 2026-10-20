@@ -1,20 +1,11 @@
-import type { Metadata } from "next";
 import { ToolPageLayout } from "@/components/layout/ToolPageLayout";
 import { RegexTesterTool } from "@/components/tools/RegexTesterTool";
-import { SITE_URL, TOOLS } from "@/lib/site-config";
+import { toolMetadata } from "@/lib/page-metadata";
+import { TOOLS } from "@/lib/site-config";
 
 const tool = TOOLS.find((t) => t.slug === "regex-tester")!;
 
-export const metadata: Metadata = {
-  title: tool.title,
-  description: tool.metaDescription,
-  alternates: { canonical: `${SITE_URL}${tool.path}` },
-  openGraph: {
-    title: tool.title,
-    description: tool.metaDescription,
-    url: `${SITE_URL}${tool.path}`,
-  },
-};
+export const metadata = toolMetadata(tool);
 
 const code = "rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800";
 
@@ -86,6 +77,16 @@ export default function RegexTesterPage() {
               17. Wrapping part of a pattern in parentheses, like{" "}
               <code className={code}>Order (\d+)</code>, captures just the number as group 1.
             </p>
+            <p className="mt-2">
+              Named capture groups label each group. The pattern{" "}
+              <code className={code}>(?&lt;year&gt;\d&#123;4&#125;)-(?&lt;month&gt;\d&#123;2&#125;)</code> with the{" "}
+              <code className={code}>g</code> flag on <code className={code}>Released 2024-01, patched 2025-12</code>{" "}
+              finds 2 matches: <code className={code}>2024-01</code> at index 9 (year{" "}
+              <code className={code}>2024</code>, month <code className={code}>01</code>) and{" "}
+              <code className={code}>2025-12</code> at index 26 (year <code className={code}>2025</code>, month{" "}
+              <code className={code}>12</code>). The results list each group by number and name, e.g.{" "}
+              <code className={code}>Group 1 &lt;year&gt;</code>.
+            </p>
           </section>
           <section>
             <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">FAQ</h2>
@@ -102,6 +103,31 @@ export default function RegexTesterPage() {
                   The pattern has a syntax error, such as an unclosed{" "}
                   <code className={code}>[</code> or <code className={code}>(</code>, or a quantifier with
                   nothing to repeat. The message from the JavaScript engine points to the problem.
+                </p>
+              </div>
+              <div>
+                <h3 className="font-medium text-zinc-900 dark:text-zinc-50">
+                  Why did my regex time out?
+                </h3>
+                <p>
+                  Some patterns take exponentially long on certain inputs — known as catastrophic
+                  backtracking. For example, <code className={code}>(a+)+$</code> against a long run of{" "}
+                  <code className={code}>a</code> characters followed by <code className={code}>!</code> can run
+                  for minutes. This tester evaluates every pattern in a Web Worker, separate from the page,
+                  and stops it after about 1.5 seconds with the message &quot;Regular expression timed out.
+                  The pattern may cause excessive backtracking.&quot; Your tab stays responsive, and you can
+                  edit the pattern and test again. Nested quantifiers like <code className={code}>(a+)+</code>{" "}
+                  are the usual cause.
+                </p>
+              </div>
+              <div>
+                <h3 className="font-medium text-zinc-900 dark:text-zinc-50">
+                  Does it work in every browser?
+                </h3>
+                <p>
+                  It needs Web Worker support, which all current major browsers have. If Web Workers are
+                  unavailable, the tester shows an error instead of running the pattern, rather than risk
+                  freezing the page.
                 </p>
               </div>
             </div>

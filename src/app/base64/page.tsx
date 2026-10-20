@@ -1,20 +1,11 @@
-import type { Metadata } from "next";
 import { ToolPageLayout } from "@/components/layout/ToolPageLayout";
 import { Base64Tool } from "@/components/tools/Base64Tool";
-import { SITE_URL, TOOLS } from "@/lib/site-config";
+import { toolMetadata } from "@/lib/page-metadata";
+import { TOOLS } from "@/lib/site-config";
 
 const tool = TOOLS.find((t) => t.slug === "base64")!;
 
-export const metadata: Metadata = {
-  title: tool.title,
-  description: tool.metaDescription,
-  alternates: { canonical: `${SITE_URL}${tool.path}` },
-  openGraph: {
-    title: tool.title,
-    description: tool.metaDescription,
-    url: `${SITE_URL}${tool.path}`,
-  },
-};
+export const metadata = toolMetadata(tool);
 
 export default function Base64Page() {
   return (
@@ -51,6 +42,19 @@ export default function Base64Page() {
               <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">aGVsbG8=</code>.
               Decoding it returns the original text.
             </p>
+            <p className="mt-2">
+              Text is converted to UTF-8 bytes before encoding, so non-ASCII text round-trips correctly:{" "}
+              <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">안녕하세요</code>{" "}
+              (Korean for &quot;hello&quot;) encodes to{" "}
+              <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">7JWI64WV7ZWY7IS47JqU</code>.
+            </p>
+          </section>
+          <section>
+            <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Base64 is not encryption</h2>
+            <p>
+              Base64 only changes how bytes are written; there is no key and no secret. Anyone can decode a
+              Base64 string, so never use it to protect passwords, tokens, or other sensitive data.
+            </p>
           </section>
           <section>
             <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">FAQ</h2>
@@ -66,6 +70,20 @@ export default function Base64Page() {
                 <p>
                   This happens when the input contains characters outside the Base64 alphabet, or has an
                   incorrect length/padding. Double-check that you copied the full encoded string.
+                </p>
+              </div>
+              <div>
+                <p className="font-medium text-zinc-900 dark:text-zinc-50">
+                  Can I decode URL-safe Base64 or a JWT segment here?
+                </p>
+                <p>
+                  Not reliably. This tool decodes standard Base64 (the <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">+</code>{" "}
+                  and <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">/</code> alphabet,
+                  padded with <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">=</code> to a
+                  multiple of 4 characters). JWTs use Base64URL, which replaces those characters with{" "}
+                  <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">-</code> and{" "}
+                  <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">_</code> and drops the
+                  padding, so those segments are often rejected. To read a token, use the JWT Decoder instead.
                 </p>
               </div>
             </div>

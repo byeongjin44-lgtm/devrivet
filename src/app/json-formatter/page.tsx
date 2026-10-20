@@ -1,20 +1,24 @@
-import type { Metadata } from "next";
 import { ToolPageLayout } from "@/components/layout/ToolPageLayout";
 import { JsonFormatterTool } from "@/components/tools/JsonFormatterTool";
-import { SITE_URL, TOOLS } from "@/lib/site-config";
+import { toolMetadata } from "@/lib/page-metadata";
+import { TOOLS } from "@/lib/site-config";
 
 const tool = TOOLS.find((t) => t.slug === "json-formatter")!;
 
-export const metadata: Metadata = {
-  title: tool.title,
-  description: tool.metaDescription,
-  alternates: { canonical: `${SITE_URL}${tool.path}` },
-  openGraph: {
-    title: tool.title,
-    description: tool.metaDescription,
-    url: `${SITE_URL}${tool.path}`,
-  },
-};
+// Formatted output is the tool's actual Format result for this input (verified in src/app/seo.test.tsx).
+const JSON_EXAMPLE_MINIFIED = '{"name":"DevRivet","tools":10,"private":true,"tags":["json","regex","hash"]}';
+const JSON_EXAMPLE_FORMATTED = `{
+  "name": "DevRivet",
+  "tools": 10,
+  "private": true,
+  "tags": [
+    "json",
+    "regex",
+    "hash"
+  ]
+}`;
+
+export const metadata = toolMetadata(tool);
 
 export default function JsonFormatterPage() {
   return (
@@ -48,12 +52,29 @@ export default function JsonFormatterPage() {
           </section>
           <section>
             <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Example</h2>
+            <p>Formatting this minified API response:</p>
+            <pre className="mt-2 overflow-x-auto rounded-md bg-zinc-100 p-3 font-mono text-xs dark:bg-zinc-800">
+              {JSON_EXAMPLE_MINIFIED}
+            </pre>
+            <p className="mt-2">produces JSON indented with 2 spaces:</p>
+            <pre className="mt-2 overflow-x-auto rounded-md bg-zinc-100 p-3 font-mono text-xs dark:bg-zinc-800">
+              {JSON_EXAMPLE_FORMATTED}
+            </pre>
+            <p className="mt-2">Minify turns the formatted version back into the single line above.</p>
+          </section>
+          <section>
+            <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              Common error: trailing comma
+            </h2>
             <p>
-              Formatting{" "}
               <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">
-                {`{"name":"DevRivet","active":true}`}
+                {`{"name":"DevRivet","tools":10,}`}
               </code>{" "}
-              produces indented, readable JSON.
+              is invalid because JSON does not allow a comma before the closing brace. In Chrome the tool
+              reports the problem at Line 1, Column 31 — the <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">{"}"}</code>{" "}
+              right after the comma. The exact error wording comes from your browser&apos;s JSON engine, so it
+              differs between browsers, and some browsers don&apos;t report a position. Remove the comma
+              and the JSON validates.
             </p>
           </section>
           <section>

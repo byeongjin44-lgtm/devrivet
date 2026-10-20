@@ -6,11 +6,13 @@ export const dynamic = "force-static";
 
 const STATIC_PATHS = ["/", "/about", "/privacy", "/terms", "/contact"];
 
+// No lastModified: a build-time timestamp would change on every deploy without the content
+// changing, which makes lastmod untrustworthy to search engines. Add real per-page dates only
+// if they are ever tracked.
 export default function sitemap(): MetadataRoute.Sitemap {
   const toolPaths = TOOLS.map((tool) => tool.path);
   return [...STATIC_PATHS, ...toolPaths].map((path) => ({
     url: `${SITE_URL}${path}`,
-    lastModified: new Date(),
     changeFrequency: "monthly" as const,
     priority: path === "/" ? 1 : 0.8,
   }));

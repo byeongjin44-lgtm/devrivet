@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
 import { Container } from "@/components/layout/Container";
-import { SITE_NAME, SITE_URL } from "@/lib/site-config";
+import { pageMetadata } from "@/lib/page-metadata";
+import { SITE_NAME } from "@/lib/site-config";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: `Contact — ${SITE_NAME}`,
   description: `Contact information for ${SITE_NAME}.`,
-  alternates: { canonical: `${SITE_URL}/contact` },
-};
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (

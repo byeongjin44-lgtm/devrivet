@@ -86,7 +86,7 @@ export function CronTool() {
   return (
     <div className="flex flex-col gap-10">
       <section className="flex flex-col gap-4">
-        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Presets</h3>
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Presets</h2>
         <div className="flex flex-wrap gap-2">
           {CRON_PRESETS.map((preset) => (
             <button
@@ -100,7 +100,7 @@ export function CronTool() {
           ))}
         </div>
 
-        <h3 className="mt-2 text-sm font-semibold text-zinc-900 dark:text-zinc-50">Custom</h3>
+        <h2 className="mt-2 text-sm font-semibold text-zinc-900 dark:text-zinc-50">Custom</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           {FIELD_CONFIG.map((f) => (
             <div key={f.key} className="flex flex-col gap-1">
@@ -129,7 +129,7 @@ export function CronTool() {
       </section>
 
       <section className="flex flex-col gap-3 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Cron Expression</h3>
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Cron Expression</h2>
         <div className="flex items-center gap-2">
           <label htmlFor="cron-expression" className="sr-only">
             Cron expression
@@ -160,7 +160,7 @@ export function CronTool() {
       {validation?.valid && (
         <section className="flex flex-col gap-3 border-t border-zinc-200 pt-6 dark:border-zinc-800">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Next Runs</h3>
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Next Runs</h2>
             <label className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
               Show
               <select

@@ -77,7 +77,7 @@ export function TimestampConverterTool() {
   return (
     <div className="flex flex-col gap-10">
       <section className="flex flex-col gap-3">
-        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Current Unix Timestamp</h3>
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Current Unix Timestamp</h2>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2">
             <span className="w-24 shrink-0 text-sm text-zinc-500 sm:w-28 dark:text-zinc-400">Seconds</span>
@@ -110,7 +110,7 @@ export function TimestampConverterTool() {
       </section>
 
       <section className="flex flex-col gap-3 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Timestamp → Date</h3>
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Timestamp → Date</h2>
         <div className="flex flex-wrap items-center gap-2">
           <label htmlFor="ts-input" className="sr-only">
             Unix timestamp
@@ -186,7 +186,7 @@ export function TimestampConverterTool() {
       </section>
 
       <section className="flex flex-col gap-3 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Date → Timestamp</h3>
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Date → Timestamp</h2>
         <label htmlFor="date-input" className="sr-only">
           Date and time (browser local time)
         </label>

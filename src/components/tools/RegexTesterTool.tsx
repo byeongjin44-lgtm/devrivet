@@ -172,7 +172,7 @@ function RegexResults({ tested }: { tested: Tested }) {
       {matches.length > 0 && (
         <>
           <div className="flex flex-col gap-1.5">
-            <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Highlighted</h3>
+            <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Highlighted</h2>
             <pre className="max-h-80 overflow-auto rounded-md border border-zinc-300 bg-zinc-50 p-3 font-mono text-sm break-all whitespace-pre-wrap text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100">
               {segments.map((segment, i) =>
                 segment.matchIndex === null ? (
@@ -192,7 +192,7 @@ function RegexResults({ tested }: { tested: Tested }) {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Matches</h3>
+            <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Matches</h2>
             <ol className="flex max-h-96 flex-col divide-y divide-zinc-200 overflow-auto rounded-md border border-zinc-300 text-sm dark:divide-zinc-800 dark:border-zinc-700">
               {matches.map((match, i) => (
                 <li key={i} className="flex flex-col gap-1 p-3">

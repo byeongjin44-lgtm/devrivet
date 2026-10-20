@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
 import { Container } from "@/components/layout/Container";
-import { SITE_NAME, SITE_URL } from "@/lib/site-config";
+import { pageMetadata } from "@/lib/page-metadata";
+import { SITE_NAME } from "@/lib/site-config";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: `Terms of Use — ${SITE_NAME}`,
   description: `Terms of use for ${SITE_NAME}.`,
-  alternates: { canonical: `${SITE_URL}/terms` },
-};
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

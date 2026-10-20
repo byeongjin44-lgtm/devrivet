@@ -1,20 +1,11 @@
-import type { Metadata } from "next";
 import { ToolPageLayout } from "@/components/layout/ToolPageLayout";
 import { JwtDecoderTool } from "@/components/tools/JwtDecoderTool";
-import { SITE_URL, TOOLS } from "@/lib/site-config";
+import { toolMetadata } from "@/lib/page-metadata";
+import { TOOLS } from "@/lib/site-config";
 
 const tool = TOOLS.find((t) => t.slug === "jwt-decoder")!;
 
-export const metadata: Metadata = {
-  title: tool.title,
-  description: tool.metaDescription,
-  alternates: { canonical: `${SITE_URL}${tool.path}` },
-  openGraph: {
-    title: tool.title,
-    description: tool.metaDescription,
-    url: `${SITE_URL}${tool.path}`,
-  },
-};
+export const metadata = toolMetadata(tool);
 
 export default function JwtDecoderPage() {
   return (
@@ -46,6 +37,39 @@ export default function JwtDecoderPage() {
               converted to human-readable dates. This tool only decodes — it never checks the signature,
               since that would require the issuer&apos;s secret or public key.
             </p>
+          </section>
+          <section>
+            <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Example</h2>
+            <p>
+              Click <strong>Load sample</strong> to decode a well-known example token. Its header is{" "}
+              <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">
+                {`{"alg":"HS256","typ":"JWT"}`}
+              </code>{" "}
+              — an HMAC-SHA256 signed JWT — and its payload is{" "}
+              <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">
+                {`{"sub":"1234567890","name":"John Doe","iat":1516239022}`}
+              </code>
+              . The tool shows <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">iat</code>{" "}
+              as <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">2018-01-18 01:30:22 UTC</code>.
+              The sample has no <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">exp</code>{" "}
+              claim, so no expiry status is shown.
+            </p>
+            <p className="mt-2">The three time claims are Unix timestamps in seconds:</p>
+            <ul className="mt-2 flex list-disc flex-col gap-1 pl-5">
+              <li>
+                <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">iat</code> (issued at) —
+                when the token was created.
+              </li>
+              <li>
+                <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">nbf</code> (not before) —
+                the token must not be accepted before this time.
+              </li>
+              <li>
+                <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">exp</code> (expiration) —
+                the token must not be accepted after this time. When it is present, the tool tells you whether
+                the token is already expired, based on your device&apos;s clock.
+              </li>
+            </ul>
           </section>
           <section>
             <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">FAQ</h2>

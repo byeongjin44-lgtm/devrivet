@@ -1,20 +1,11 @@
-import type { Metadata } from "next";
 import { ToolPageLayout } from "@/components/layout/ToolPageLayout";
 import { TimestampConverterTool } from "@/components/tools/TimestampConverterTool";
-import { SITE_URL, TOOLS } from "@/lib/site-config";
+import { toolMetadata } from "@/lib/page-metadata";
+import { TOOLS } from "@/lib/site-config";
 
 const tool = TOOLS.find((t) => t.slug === "timestamp-converter")!;
 
-export const metadata: Metadata = {
-  title: tool.title,
-  description: tool.metaDescription,
-  alternates: { canonical: `${SITE_URL}${tool.path}` },
-  openGraph: {
-    title: tool.title,
-    description: tool.metaDescription,
-    url: `${SITE_URL}${tool.path}`,
-  },
-};
+export const metadata = toolMetadata(tool);
 
 export default function TimestampConverterPage() {
   return (
@@ -54,6 +45,15 @@ export default function TimestampConverterPage() {
               The timestamp{" "}
               <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">0</code> converts
               to <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">1970-01-01 00:00:00 UTC</code>.
+            </p>
+            <p className="mt-2">
+              <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">1704067200</code> (10
+              digits, read as seconds) and{" "}
+              <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">1704067200000</code> (13
+              digits, read as milliseconds) are the same instant:{" "}
+              <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">2024-01-01 00:00:00 UTC</code>.
+              The Local field shows that instant in your browser&apos;s timezone — for example 09:00 on
+              January 1, 2024 in Seoul (UTC+9), or 19:00 on December 31, 2023 in New York (UTC−5).
             </p>
           </section>
           <section>

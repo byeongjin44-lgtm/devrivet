@@ -71,10 +71,13 @@ src/
   lib/                 Pure tool logic + unit tests (one `<tool>.ts` + `<tool>.test.ts` per tool)
 ```
 
-`src/lib/site-config.ts` centralizes `SITE_NAME` (now `DevRivet`), `SITE_URL`, `SITE_DESCRIPTION`, and the tool registry — update it in one place for any future brand/domain change.
+`src/lib/site-config.ts` centralizes `SITE_NAME` (now `DevRivet`), `SITE_URL`, `SITE_DESCRIPTION`, `CONTACT_EMAIL`, and the tool registry — update it in one place for any future brand/domain change.
+
+## Contact email
+
+The public contact address is `contact@devrivettools.com`, shown on the Contact page (`CONTACT_EMAIL` in `src/lib/site-config.ts`). Incoming mail is handled by Cloudflare Email Routing, which receives messages for the domain and forwards them to the maintainer's private inbox. Email Routing is receive-and-forward only: it does not send mail, so replies do not go out from `contact@devrivettools.com` unless a separate sending service is set up. Never publish the forwarding destination address on the site.
 
 ## Known issues
 
-- **Contact email is still a placeholder** (`contact@example.com` in `src/app/contact/page.tsx`) — update to a real `@devrivettools.com` address once mail receiving is set up. **Blocker for production launch.**
 - `npm audit` reports 5 high-severity advisories in `braces`/`micromatch`/`fast-glob`, pulled in transitively by `eslint-config-next`. This is a **dev-only lint tooling** dependency chain (not part of the production bundle) and the advisory requires attacker-controlled glob patterns, which doesn't apply to our lint usage. No non-breaking fix is currently published upstream; revisit when `eslint-config-next` releases an update.
 - Next.js is pinned to `16.4.1`, the 2026-10-14 security release that fixes GHSA-673q-mjm6-r5xr and GHSA-2464-fhr4-w9xw (Critical) and GHSA-p3m5-59mp-jv5r (High). Before any future Next.js upgrade, check the official security advisories and release notes first.

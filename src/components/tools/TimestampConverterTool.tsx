@@ -79,23 +79,25 @@ export function TimestampConverterTool() {
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Current Unix Timestamp</h2>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-2">
-            <span className="w-24 shrink-0 text-sm text-zinc-500 sm:w-28 dark:text-zinc-400">Seconds</span>
+          {/* Below `sm` each row takes the full width with its label on its own line, so the
+              fixed-width desktop row (label + input + Copy) can't push the page wider than a phone. */}
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
+            <span className="w-full shrink-0 text-sm text-zinc-500 sm:w-28 dark:text-zinc-400">Seconds</span>
             <input
               readOnly
               value={now ? now.seconds : "—"}
               aria-label="Current Unix timestamp in seconds"
-              className="w-40 min-w-0 rounded-md border border-zinc-300 bg-zinc-50 p-2 font-mono text-base sm:text-sm dark:border-zinc-700 dark:bg-zinc-950"
+              className="min-w-0 flex-1 rounded-md border border-zinc-300 bg-zinc-50 p-2 font-mono text-base sm:w-40 sm:flex-none sm:text-sm dark:border-zinc-700 dark:bg-zinc-950"
             />
             <CopyButton getText={() => String(now?.seconds ?? "")} disabled={!now} />
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-24 shrink-0 text-sm text-zinc-500 sm:w-28 dark:text-zinc-400">Milliseconds</span>
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
+            <span className="w-full shrink-0 text-sm text-zinc-500 sm:w-28 dark:text-zinc-400">Milliseconds</span>
             <input
               readOnly
               value={now ? now.milliseconds : "—"}
               aria-label="Current Unix timestamp in milliseconds"
-              className="w-40 min-w-0 rounded-md border border-zinc-300 bg-zinc-50 p-2 font-mono text-base sm:text-sm dark:border-zinc-700 dark:bg-zinc-950"
+              className="min-w-0 flex-1 rounded-md border border-zinc-300 bg-zinc-50 p-2 font-mono text-base sm:w-40 sm:flex-none sm:text-sm dark:border-zinc-700 dark:bg-zinc-950"
             />
             <CopyButton getText={() => String(now?.milliseconds ?? "")} disabled={!now} />
           </div>

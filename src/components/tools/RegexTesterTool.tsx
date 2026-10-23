@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { MAX_MATCHES, REGEX_FLAGS, splitHighlights, type RegexTestResult } from "@/lib/regex";
 import { runRegex } from "@/lib/regex-runner";
 import { CopyButton } from "@/components/CopyButton";
@@ -15,9 +15,15 @@ export function RegexTesterTool() {
   const [running, setRunning] = useState(false);
   // Bumped on every new run or edit so a slow/stale result is never shown.
   const runId = useRef(0);
+  // Aborting stops the superseded run's worker right away instead of letting it run to its timeout.
+  const activeRun = useRef<AbortController | null>(null);
+
+  useEffect(() => () => activeRun.current?.abort(), []);
 
   function setTested(value: Tested | null) {
     runId.current++;
+    activeRun.current?.abort();
+    activeRun.current = null;
     setRunning(false);
     setTestedState(value);
   }
@@ -26,9 +32,12 @@ export function RegexTesterTool() {
     e?.preventDefault();
     setTested(null);
     const id = runId.current;
+    const controller = new AbortController();
+    activeRun.current = controller;
     setRunning(true);
-    const result = await runRegex(pattern, flags, input);
+    const result = await runRegex(pattern, flags, input, { signal: controller.signal });
     if (id !== runId.current) return;
+    activeRun.current = null;
     setRunning(false);
     setTestedState({ input, result });
   }

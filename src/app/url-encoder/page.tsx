@@ -52,7 +52,7 @@ export default function UrlEncoderPage() {
                 name=John Doe&amp;city=New York
               </code>{" "}
               produces{" "}
-              <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">
+              <code className="break-all rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800">
                 name%3DJohn%20Doe%26city%3DNew%20York
               </code>
               .

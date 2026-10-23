@@ -2,33 +2,38 @@
 
 ## Status
 
-**Not enabled yet.** The codebase contains no analytics script — no Cloudflare beacon, no Google
-Analytics, no other tracker. Do not add one to the code; see below for how analytics will be enabled.
+**Enabled.** Production (`https://devrivettools.com`) uses
+[Cloudflare Web Analytics](https://developers.cloudflare.com/web-analytics/) with **automatic setup**:
+Cloudflare injects its beacon (`static.cloudflareinsights.com/beacon.min.js`) into the HTML at the
+edge. The repo itself contains no analytics script, and the static build in `out/` has none.
 
-## Plan: Cloudflare Web Analytics
+## Do not add analytics code to the repo
 
-Production visitor analytics for DevRivet will use
-[Cloudflare Web Analytics](https://developers.cloudflare.com/web-analytics/). It is cookie-free,
-does not fingerprint visitors, and does not collect anything typed into the tools. Tool input stays
-in the browser regardless of whether analytics is on.
+- Do **not** add the manual `beacon.min.js` snippet (e.g. in `src/app/layout.tsx`). Automatic setup
+  already injects it, and Cloudflare allows only one Web Analytics snippet per page — a manual copy
+  would duplicate it.
+- Do **not** add Google Analytics, Google Tag Manager, or any other tracker, and don't install an
+  analytics package.
+- Use the manual snippet only if the site ever stops being served through Cloudflare. In that case,
+  turn off automatic setup first, add the snippet in one place (`src/app/layout.tsx`), and document
+  it here.
 
-## Enabling it after deploying to Cloudflare
+To check that there is exactly one beacon, fetch a production page with a browser-like
+`User-Agent`/`Accept: text/html` header and count `beacon.min.js` (it should be 1). The local `out/`
+build should contain 0.
 
-For a site deployed on Cloudflare Pages / Workers, or proxied through Cloudflare:
+## Privacy
 
-1. Cloudflare dashboard → **Analytics & Logs → Web Analytics** (or the Pages/Workers project →
-   **Metrics → Web Analytics**).
-2. **Add a site** and choose the production hostname (the real domain that replaces the
-   `SITE_URL` placeholder in `src/lib/site-config.ts`).
-3. Choose **automatic setup** (Cloudflare injects the beacon at the edge for proxied sites/Pages
-   projects). No code change in this repo is needed.
-   - Use the manual JS snippet only if the site is *not* served through Cloudflare. If that ever
-     becomes necessary, add it in one place (`src/app/layout.tsx`) and document it here.
-4. Optional: add excluded paths/hostnames (e.g. preview deployments) so test traffic isn't counted.
-5. Wait for traffic, then confirm data appears in the dashboard.
-6. **Update the Privacy page** (`src/app/privacy/page.tsx`, "Analytics and advertising" section) to
-   say Cloudflare Web Analytics is in use and what it collects. There is a `TODO(analytics)` comment
-   there marking the spot. Do this at the same time analytics is switched on, not before.
+Cloudflare states that Web Analytics doesn't use cookies or localStorage to collect usage
+metrics, and doesn't fingerprint visitors. It also doesn't log query strings. Tool input never
+leaves the browser, and no tool writes input into the URL. The public disclosure lives in the
+"Analytics" section of the Privacy page (`src/app/privacy/page.tsx`). Keep the two in sync if the
+analytics setup changes.
+
+## Dashboard settings
+
+Cloudflare dashboard → **Analytics & Logs → Web Analytics** (or the Pages project → **Metrics →
+Web Analytics**). Optional: exclude preview hostnames (`*.pages.dev`) so test traffic isn't counted.
 
 ## What the dashboard shows
 

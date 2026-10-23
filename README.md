@@ -37,6 +37,10 @@ The DevRivet v1 feature set is locked at the 10 tools above until real productio
 
 All tool input (text, SQL, UUIDs, JSON, URLs, timestamps, tokens, regex patterns, text to hash, etc.) is processed locally in the browser. Nothing you type into a tool is intentionally sent to or stored on a server. See `/privacy` for the full policy.
 
+## Analytics
+
+Production uses Cloudflare Web Analytics with automatic setup: Cloudflare injects the beacon at the edge, so the repo contains no analytics script. Don't add the manual beacon snippet, Google Analytics, GTM, or any analytics package. See `ANALYTICS.md` for details.
+
 ## Tech stack
 
 - Next.js 16.4.1 (App Router, TypeScript, Turbopack)

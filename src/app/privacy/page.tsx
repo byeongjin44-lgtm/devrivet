@@ -12,7 +12,7 @@ export default function PrivacyPage() {
   return (
     <Container className="flex flex-1 flex-col gap-4 py-12 text-zinc-700 dark:text-zinc-300">
       <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Privacy Policy</h1>
-      <p>Last updated: 2026-10-09</p>
+      <p>Last updated: 2026-10-23</p>
 
       <h2 className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Tool input</h2>
       <p>
@@ -25,15 +25,44 @@ export default function PrivacyPage() {
         {SITE_NAME} does not require account creation and does not operate a database of user content.
       </p>
 
-      <h2 className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-        Analytics and advertising
-      </h2>
-      {/* TODO(analytics): Cloudflare Web Analytics is planned but NOT enabled yet (see ANALYTICS.md).
-          When it is actually switched on, update this section to disclose it and what it collects. */}
+      <h2 className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Analytics</h2>
       <p>
-        We do not currently run analytics or advertising on this site. If we enable these in the future
-        (for example, Google AdSense), this policy will be updated beforehand to describe what data is
-        collected and how it is used.
+        We use Cloudflare Web Analytics to understand website traffic and page performance. The
+        analytics service is provided by Cloudflare, and its script is added to our pages by
+        Cloudflare.
+      </p>
+      <p>
+        Analytics may report page views, visited paths, referrers, approximate visitor locations (such
+        as country), device type, browser and operating system, and performance metrics such as page
+        load time and Core Web Vitals.
+      </p>
+      <p>
+        According to Cloudflare&apos;s documentation, Web Analytics does not use cookies or
+        localStorage to track visitors. Tool inputs are processed locally in your browser and are not
+        intentionally sent to our servers as part of analytics. For details, see{" "}
+        <a
+          href="https://www.cloudflare.com/web-analytics/"
+          className="font-medium text-zinc-900 underline dark:text-zinc-50"
+          rel="noopener noreferrer"
+        >
+          Cloudflare Web Analytics
+        </a>{" "}
+        and its{" "}
+        <a
+          href="https://developers.cloudflare.com/web-analytics/"
+          className="font-medium text-zinc-900 underline dark:text-zinc-50"
+          rel="noopener noreferrer"
+        >
+          documentation
+        </a>
+        .
+      </p>
+
+      <h2 className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Advertising</h2>
+      <p>
+        We do not currently run advertising on this site. If we enable it in the future (for example,
+        Google AdSense), this policy will be updated beforehand to describe what data is collected and
+        how it is used.
       </p>
 
       <h2 className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Hosting logs</h2>

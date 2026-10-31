@@ -1,0 +1,67 @@
+{
+  "slug": "cron-every-5-minutes",
+  "title": "Cron Expression for Every 5 Minutes (and Other Common Intervals)",
+  "description": "The cron expression for every 5 minutes is */5 * * * *. Learn how step values work, how to limit runs to business hours, and the pitfalls of odd intervals.",
+  "published": "2026-10-31",
+  "relatedTool": "cron-generator",
+  "body": [
+    { "type": "p", "text": "To run a job every 5 minutes, use this cron expression:" },
+    { "type": "code", "text": "*/5 * * * *" },
+    {
+      "type": "p",
+      "text": "It runs at minute 0, 5, 10, 15 and so on through 55 of every hour, every day. You can paste it into the [Cron Expression Generator](/cron-generator) to see a plain-English explanation and the next run times in your timezone."
+    },
+    { "type": "h2", "text": "How the five fields work" },
+    {
+      "type": "p",
+      "text": "A standard cron expression has five fields separated by spaces: minute, hour, day of month, month and day of week. A `*` means \"every value\", and `*/5` in the minute field means \"every 5th minute, starting at 0\"."
+    },
+    { "type": "code", "text": "┌───────────── minute (0-59)\n│ ┌─────────── hour (0-23)\n│ │ ┌───────── day of month (1-31)\n│ │ │ ┌─────── month (1-12)\n│ │ │ │ ┌───── day of week (0-6, Sunday = 0)\n│ │ │ │ │\n*/5 * * * *" },
+    { "type": "h2", "text": "Other common intervals" },
+    {
+      "type": "ul",
+      "items": [
+        "`*/10 * * * *` — every 10 minutes",
+        "`*/15 * * * *` — every 15 minutes (at :00, :15, :30 and :45)",
+        "`*/30 * * * *` — every 30 minutes (at :00 and :30)",
+        "`0 * * * *` — every hour, on the hour",
+        "`0 */2 * * *` — every 2 hours, on the hour"
+      ]
+    },
+    { "type": "h2", "text": "Every 5 minutes, but only during business hours" },
+    { "type": "p", "text": "Combine a step value in the minute field with ranges in the hour and day-of-week fields:" },
+    { "type": "code", "text": "*/5 9-17 * * 1-5" },
+    {
+      "type": "p",
+      "text": "This runs every 5 minutes from 9:00 through 17:55, Monday to Friday. Note that the hour range `9-17` includes the whole 17:00 hour, so the last run of the day is at 17:55, not 17:00."
+    },
+    { "type": "h2", "text": "Starting at a different minute" },
+    {
+      "type": "p",
+      "text": "`*/5` always starts at minute 0. If many jobs run on the same 5-minute boundary, you can spread the load by starting at another minute with a range-plus-step:"
+    },
+    { "type": "code", "text": "2-59/5 * * * *" },
+    { "type": "p", "text": "This runs at minute 2, 7, 12 and so on through 57 of every hour." },
+    { "type": "h2", "text": "Watch out for intervals that don't divide 60" },
+    {
+      "type": "p",
+      "text": "A step value restarts at the top of every hour. `*/7 * * * *` runs at minutes 0, 7, 14, 21, 28, 35, 42, 49 and 56 — and then again at minute 0 of the next hour, only 4 minutes later. If you need a truly even interval, pick a step that divides 60 (1, 2, 3, 4, 5, 6, 10, 12, 15, 20 or 30)."
+    },
+    { "type": "h2", "text": "FAQ" },
+    { "type": "h3", "text": "Can cron run a job every 5 seconds?" },
+    {
+      "type": "p",
+      "text": "Standard 5-field cron has a resolution of one minute, so it cannot schedule anything more often than once a minute. For sub-minute schedules, use a scheduler that supports seconds or a long-running process with its own timer."
+    },
+    { "type": "h3", "text": "Which timezone does cron use?" },
+    {
+      "type": "p",
+      "text": "That depends on the scheduler. Classic cron uses the server's system timezone, while many hosted schedulers use UTC. Check your scheduler's documentation, especially around daylight saving time changes."
+    },
+    { "type": "h3", "text": "Will a job run exactly on time?" },
+    {
+      "type": "p",
+      "text": "Not always. Hosted schedulers can delay runs when they are busy, and a job that takes longer than 5 minutes may overlap with the next run unless you add locking."
+    }
+  ]
+}

@@ -5,7 +5,7 @@ import { renderToString } from "react-dom/server";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL, TOOLS, getRelatedTools } from "@/lib/site-config";
 import { encodeBase64, decodeBase64 } from "@/lib/base64";
 import { formatSql } from "@/lib/sql-format";
-import { explainCronExpression } from "@/lib/cron";
+import { explainCronExpression, validateCronExpression } from "@/lib/cron";
 import { formatJson, minifyJson, validateJson } from "@/lib/json-format";
 import { encodeUrlComponent, decodeUrlComponent } from "@/lib/url-encode";
 import { detectTimestampUnit, formatUtc, parseTimestamp } from "@/lib/timestamp";
@@ -33,6 +33,9 @@ import * as timestamp from "./timestamp-converter/page";
 import * as jwt from "./jwt-decoder/page";
 import * as regex from "./regex-tester/page";
 import * as hash from "./hash-generator/page";
+import * as blogIndex from "./blog/page";
+import BlogPostPage, { generateMetadata as blogPostMetadata, generateStaticParams as blogStaticParams } from "./blog/[slug]/page";
+import { blogPath, getAllPosts } from "@/lib/blog";
 
 vi.mock("next/font/google", () => ({
   Geist: () => ({ variable: "font-sans" }),
@@ -41,7 +44,13 @@ vi.mock("next/font/google", () => ({
 
 type PageModule = { metadata: Metadata; default: ComponentType };
 
-const INFO_PAGES: Record<string, PageModule> = { "/about": about, "/privacy": privacy, "/terms": terms, "/contact": contact };
+const INFO_PAGES: Record<string, PageModule> = {
+  "/about": about,
+  "/privacy": privacy,
+  "/terms": terms,
+  "/contact": contact,
+  "/blog": blogIndex,
+};
 const TOOL_PAGES: Record<string, PageModule> = {
   "/base64": base64,
   "/uuid-generator": uuid,
@@ -55,7 +64,9 @@ const TOOL_PAGES: Record<string, PageModule> = {
   "/hash-generator": hash,
 };
 const PAGES: Record<string, PageModule> = { "/": home, ...INFO_PAGES, ...TOOL_PAGES };
-const ROUTES = new Set(Object.keys(PAGES));
+const POSTS = getAllPosts();
+const POST_PATHS = POSTS.map((post) => blogPath(post.slug));
+const ROUTES = new Set([...Object.keys(PAGES), ...POST_PATHS]);
 
 const decodeEntities = (s: string) =>
   s
@@ -133,15 +144,18 @@ describe("metadata", () => {
 describe("sitemap and robots", () => {
   const entries = sitemap();
 
-  it("lists the homepage, 4 info pages and every tool exactly once", () => {
+  it("lists the homepage, info pages, the blog, every tool and every post exactly once", () => {
     const urls = entries.map((e) => e.url);
-    expect(urls).toHaveLength(15);
-    expect(new Set(urls).size).toBe(15);
+    expect(urls).toHaveLength(ROUTES.size);
+    expect(new Set(urls).size).toBe(ROUTES.size);
     expect(new Set(urls)).toEqual(new Set([...ROUTES].map((path) => `${SITE_URL}${path}`)));
   });
 
-  it("has no build-time lastmod", () => {
-    for (const entry of entries) expect(entry.lastModified).toBeUndefined();
+  it("has no build-time lastmod; only blog posts carry their real content dates", () => {
+    for (const entry of entries) {
+      const post = POSTS.find((p) => `${SITE_URL}${blogPath(p.slug)}` === entry.url);
+      expect(entry.lastModified).toBe(post ? (post.updated ?? post.published) : undefined);
+    }
   });
 
   it("robots.txt allows crawling and points to the sitemap", () => {
@@ -337,5 +351,51 @@ describe("documented examples", () => {
     expect(text).toContain("2025-12 at index 26");
     expect(text).toContain("Regular expression timed out. The pattern may cause excessive backtracking.");
     expect(text).toContain("about 1.5 seconds");
+  });
+});
+
+describe("blog posts", () => {
+  it("has at least one post and pre-renders every post", () => {
+    expect(POSTS.length).toBeGreaterThan(0);
+    expect(blogStaticParams()).toEqual(POSTS.map((p) => ({ slug: p.slug })));
+  });
+
+  it("blog index links every post", () => {
+    const links = internal(hrefs(render("/blog")));
+    for (const postPath of POST_PATHS) expect(links).toContain(postPath);
+  });
+
+  it.each(POSTS.map((p) => p.slug))("%s has metadata, one H1, valid internal links and a link to its tool", async (slug) => {
+    const params = Promise.resolve({ slug });
+    const metadata = await blogPostMetadata({ params });
+    const expected = `${SITE_URL}${blogPath(slug)}`;
+    expect(metadata.alternates?.canonical).toBe(expected);
+    expect(metadata.openGraph).toMatchObject({ url: expected, siteName: SITE_NAME });
+
+    const html = renderToString(await BlogPostPage({ params }));
+    const levels = [...html.matchAll(/<h([1-6])[\s>]/g)].map((m) => Number(m[1]));
+    expect(levels.filter((l) => l === 1)).toHaveLength(1);
+    expect(levels[0]).toBe(1);
+    levels.forEach((level, i) => {
+      if (i > 0) expect(level).toBeLessThanOrEqual(levels[i - 1] + 1);
+    });
+    for (const href of internal(hrefs(html))) expect(ROUTES.has(href), href).toBe(true);
+
+    const post = POSTS.find((p) => p.slug === slug)!;
+    const tool = TOOLS.find((t) => t.slug === post.relatedTool);
+    if (tool) {
+      expect(internal(hrefs(html))).toContain(tool.path);
+      expect(internal(hrefs(render(tool.path)))).toContain(blogPath(slug));
+    }
+  });
+
+  it("cron-every-5-minutes only documents valid cron expressions", () => {
+    const post = POSTS.find((p) => p.slug === "cron-every-5-minutes")!;
+    const expressions = post.body
+      .flatMap((b) => (b.type === "code" ? [b.text] : b.type === "ul" ? b.items : b.type === "p" ? [b.text] : []))
+      .flatMap((text) => [...text.matchAll(/`([^`]+)`/g)].map((m) => m[1]).concat(text.split("\n").at(-1) ?? []))
+      .filter((s) => /^[\d*/,-]+( [\d*/,-]+){4}$/.test(s));
+    expect(expressions).toEqual(expect.arrayContaining(["*/5 * * * *", "*/5 9-17 * * 1-5", "2-59/5 * * * *", "*/7 * * * *"]));
+    for (const expr of expressions) expect(validateCronExpression(expr), expr).toEqual({ valid: true });
   });
 });

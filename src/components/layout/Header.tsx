@@ -12,7 +12,15 @@ export function Header() {
         >
           {SITE_NAME}
         </Link>
-        <ToolsMenu />
+        <div className="flex items-center gap-2">
+          <Link
+            href="/blog"
+            className="rounded-md px-2 py-1 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+          >
+            Blog
+          </Link>
+          <ToolsMenu />
+        </div>
       </div>
     </header>
   );

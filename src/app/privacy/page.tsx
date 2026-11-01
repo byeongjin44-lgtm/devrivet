@@ -1,6 +1,8 @@
 import { Container } from "@/components/layout/Container";
 import { pageMetadata } from "@/lib/page-metadata";
-import { SITE_NAME } from "@/lib/site-config";
+import { ADSENSE_CLIENT, SITE_NAME } from "@/lib/site-config";
+
+const LINK = "font-medium text-zinc-900 underline dark:text-zinc-50";
 
 export const metadata = pageMetadata({
   title: `Privacy Policy — ${SITE_NAME}`,
@@ -59,11 +61,39 @@ export default function PrivacyPage() {
       </p>
 
       <h2 className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Advertising</h2>
-      <p>
-        We do not currently run advertising on this site. If we enable it in the future (for example,
-        Google AdSense), this policy will be updated beforehand to describe what data is collected and
-        how it is used.
-      </p>
+      {ADSENSE_CLIENT ? (
+        <>
+          <p>
+            We show ads served by Google AdSense. Google and its partners use cookies and similar
+            technologies to serve ads, to limit how often you see an ad, to measure ad performance, and
+            to prevent fraud. If you have consented (or where consent is not required), ads may be
+            personalized based on your visits to this and other websites.
+          </p>
+          <p>
+            Visitors in the European Economic Area, the United Kingdom and Switzerland are asked for
+            consent through a consent message before personalized ads are shown, and can change their
+            choice at any time through that message. Ads never have access to what you type into our
+            tools: tool input stays in your browser.
+          </p>
+          <p>
+            You can learn{" "}
+            <a href="https://policies.google.com/technologies/partner-sites" className={LINK} rel="noopener noreferrer">
+              how Google uses information from sites that use its services
+            </a>
+            , and you can turn off personalized advertising in{" "}
+            <a href="https://myadcenter.google.com/" className={LINK} rel="noopener noreferrer">
+              My Ad Center
+            </a>
+            .
+          </p>
+        </>
+      ) : (
+        <p>
+          We do not currently run advertising on this site. If we enable it in the future (for example,
+          Google AdSense), this policy will be updated beforehand to describe what data is collected and
+          how it is used.
+        </p>
+      )}
 
       <h2 className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Hosting logs</h2>
       <p>

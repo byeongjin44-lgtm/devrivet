@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import type { Metadata } from "next";
 import type { ComponentType } from "react";
 import { renderToString } from "react-dom/server";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_URL, TOOLS, getRelatedTools } from "@/lib/site-config";
+import { ADSENSE_CLIENT, SITE_DESCRIPTION, SITE_NAME, SITE_URL, TOOLS, adsTxt, getRelatedTools } from "@/lib/site-config";
+import { GET as adsTxtRoute } from "./ads.txt/route";
 import { encodeBase64, decodeBase64 } from "@/lib/base64";
 import { formatSql } from "@/lib/sql-format";
 import { explainCronExpression, validateCronExpression } from "@/lib/cron";
@@ -397,5 +398,26 @@ describe("blog posts", () => {
       .filter((s) => /^[\d*/,-]+( [\d*/,-]+){4}$/.test(s));
     expect(expressions).toEqual(expect.arrayContaining(["*/5 * * * *", "*/5 9-17 * * 1-5", "2-59/5 * * * *", "*/7 * * * *"]));
     for (const expr of expressions) expect(validateCronExpression(expr), expr).toEqual({ valid: true });
+  });
+});
+
+describe("advertising", () => {
+  it("ads.txt authorizes exactly the configured AdSense account", async () => {
+    expect(adsTxt("ca-pub-1234567890123456")).toBe("google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0\n");
+    expect(() => adsTxt("pub-123")).toThrow();
+    expect(await adsTxtRoute().text()).toBe(adsTxt(ADSENSE_CLIENT));
+  });
+
+  it("loads the AdSense script only when an account is configured, and the privacy page says so", () => {
+    const html = renderToString(<RootLayout params={Promise.resolve({})}>{null}</RootLayout>);
+    const privacyText = pageText("/privacy");
+    if (ADSENSE_CLIENT) {
+      expect(html).toContain(`adsbygoogle.js?client=${ADSENSE_CLIENT}`);
+      expect(privacyText).toContain("Google AdSense");
+      expect(privacyText).not.toContain("We do not currently run advertising");
+    } else {
+      expect(html).not.toContain("googlesyndication");
+      expect(privacyText).toContain("We do not currently run advertising");
+    }
   });
 });

@@ -14,7 +14,7 @@ export default function PrivacyPage() {
   return (
     <Container className="flex flex-1 flex-col gap-4 py-12 text-zinc-700 dark:text-zinc-300">
       <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Privacy Policy</h1>
-      <p>Last updated: 2026-10-23</p>
+      <p>Last updated: 2026-11-01</p>
 
       <h2 className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Tool input</h2>
       <p>

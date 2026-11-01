@@ -7,7 +7,7 @@ export const CONTACT_EMAIL = "contact@devrivettools.com";
  * EEA/UK/Switzerland, configured in the AdSense dashboard), fills /ads.txt, and shows the
  * Advertising section of the Privacy page. Update that page's "Last updated" date when enabling.
  */
-export const ADSENSE_CLIENT: string | null = null;
+export const ADSENSE_CLIENT: string | null = "ca-pub-5531085038115326";
 
 /** Contents of /ads.txt for the configured AdSense account. */
 export function adsTxt(client: string | null = ADSENSE_CLIENT): string {

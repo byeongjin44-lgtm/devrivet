@@ -1,7 +1,23 @@
 export const SITE_NAME = "DevRivet";
 export const SITE_URL = "https://devrivettools.com";
 export const CONTACT_EMAIL = "contact@devrivettools.com";
-export const SITE_TITLE = `${SITE_NAME} — Free Online Developer Tools`;
+/**
+ * Google AdSense publisher ID ("ca-pub-" + 16 digits), or null while the site runs no ads.
+ * Setting it loads the AdSense script on every page (Auto ads + the AdSense consent message for
+ * EEA/UK/Switzerland, configured in the AdSense dashboard), fills /ads.txt, and shows the
+ * Advertising section of the Privacy page. Update that page's "Last updated" date when enabling.
+ */
+export const ADSENSE_CLIENT: string | null = null;
+
+/** Contents of /ads.txt for the configured AdSense account. */
+export function adsTxt(client: string | null = ADSENSE_CLIENT): string {
+  if (!client) return "# This site does not run advertising yet.\n";
+  if (!/^ca-pub-\d{16}$/.test(client)) throw new Error(`ADSENSE_CLIENT must look like ca-pub-0000000000000000, got ${client}`);
+  // f08c47fec0942fa0 is Google's certification authority ID, the same for every AdSense publisher.
+  return `google.com, ${client.replace(/^ca-/, "")}, DIRECT, f08c47fec0942fa0\n`;
+}
+
+export const SITE_TITLE =`${SITE_NAME} — Free Online Developer Tools`;
 export const SITE_DESCRIPTION =
   "10 free developer tools that run in your browser: JSON and SQL formatters, Base64, URL and JWT decoders, UUID, hash, regex, cron and timestamp tools. No sign-up.";
 

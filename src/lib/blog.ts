@@ -106,6 +106,23 @@ export function getPostsForTool(toolSlug: string, limit = 5): BlogPost[] {
     .slice(0, limit);
 }
 
+/**
+ * Posts to read next, shown under a post: same tool first, then tools in the same category,
+ * then the newest of the rest. Ties keep newest-first order.
+ */
+export function getRelatedPosts(post: BlogPost, limit = 3, posts: BlogPost[] = getAllPosts()): BlogPost[] {
+  const categoryOf = (p: BlogPost) => TOOLS.find((t) => t.slug === p.relatedTool)?.category;
+  const category = categoryOf(post);
+  const rank = (p: BlogPost) =>
+    post.relatedTool && p.relatedTool === post.relatedTool ? 0 : category && categoryOf(p) === category ? 1 : 2;
+  return posts
+    .filter((p) => p.slug !== post.slug)
+    .map((p, index) => ({ p, index, rank: rank(p) }))
+    .sort((a, b) => a.rank - b.rank || a.index - b.index)
+    .slice(0, limit)
+    .map(({ p }) => p);
+}
+
 export function getPostTool(post: BlogPost): ToolDefinition | undefined {
   return TOOLS.find((t) => t.slug === post.relatedTool);
 }

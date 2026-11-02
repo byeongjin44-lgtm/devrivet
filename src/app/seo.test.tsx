@@ -193,10 +193,21 @@ describe("static HTML", () => {
     expect(h2s).toContain("FAQ");
   });
 
-  it("about page lists every tool from the registry", () => {
+  it("about page lists every tool from the registry, the blog and how to report errors", () => {
     const html = render("/about");
     expect(pageText("/about")).toContain(`free collection of ${TOOLS.length} focused`);
-    expect(new Set(internal(hrefs(html)))).toEqual(new Set(TOOLS.map((t) => t.path)));
+    expect(new Set(internal(hrefs(html)))).toEqual(new Set([...TOOLS.map((t) => t.path), "/blog", "/contact"]));
+    expect(hrefs(html)).toContain("mailto:contact@devrivettools.com");
+  });
+
+  it("each post links to up to 3 related guides, never itself", async () => {
+    for (const post of POSTS) {
+      const html = renderToString(await BlogPostPage({ params: Promise.resolve({ slug: post.slug }) }));
+      const section = html.split('id="related-guides"')[1] ?? "";
+      const links = internal(hrefs(section)).filter((h) => h.startsWith("/blog/"));
+      expect(links.length).toBe(Math.min(3, POSTS.length - 1));
+      expect(links).not.toContain(blogPath(post.slug));
+    }
   });
 
   it("every internal link on pages, header and footer points to an existing route", () => {

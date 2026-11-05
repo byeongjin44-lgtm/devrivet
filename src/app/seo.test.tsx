@@ -4,6 +4,7 @@ import type { ComponentType } from "react";
 import { renderToString } from "react-dom/server";
 import { ADSENSE_CLIENT, SITE_DESCRIPTION, SITE_NAME, SITE_URL, TOOLS, adsTxt, getRelatedTools } from "@/lib/site-config";
 import { GET as adsTxtRoute } from "./ads.txt/route";
+import { ogImageKey, ogImagePath } from "@/lib/og";
 import { encodeBase64, decodeBase64 } from "@/lib/base64";
 import { formatSql } from "@/lib/sql-format";
 import { explainCronExpression, validateCronExpression } from "@/lib/cron";
@@ -117,6 +118,20 @@ describe("metadata", () => {
       siteName: SITE_NAME,
       type: "website",
     });
+  });
+
+  it.each(Object.keys(PAGES))("%s has a 1200x630 share-preview image", (path) => {
+    const images = PAGES[path].metadata.openGraph?.images as { url: string; width: number; height: number }[];
+    expect(images[0]).toMatchObject({ url: `${SITE_URL}${ogImagePath(path)}`, width: 1200, height: 630 });
+    expect(PAGES[path].metadata.twitter).toMatchObject({ card: "summary_large_image" });
+  });
+
+  it("tools, posts and the homepage get their own preview image; other pages share the homepage one", () => {
+    expect(ogImageKey("/")).toBe("home");
+    expect(ogImageKey("/about")).toBe("home");
+    expect(ogImageKey("/blog")).toBe("home");
+    expect(ogImageKey("/blog/x")).toBe("blog-x");
+    for (const tool of TOOLS) expect(ogImageKey(tool.path)).toBe(tool.slug);
   });
 
   it("tool metadata comes from the registry and names the brand", () => {

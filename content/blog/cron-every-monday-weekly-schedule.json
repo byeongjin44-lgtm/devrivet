@@ -1,8 +1,9 @@
 {
   "slug": "cron-every-monday-weekly-schedule",
-  "title": "Cron Every Monday: Expressions and Weekly Schedules",
-  "description": "Use 0 9 * * 1 to run a cron job every Monday at 9:00 AM. Covers day-of-week numbers, named days, and the day-of-month OR rule that trips people up.",
+  "title": "Cron Expression for Every Monday (0 9 * * 1) and Weekly Schedules",
+  "description": "Use 0 9 * * 1 to run a cron job every Monday at 9:00 AM. Examples for crontab, GitHub Actions, Kubernetes CronJob and Node.js, plus day-of-week numbering.",
   "published": "2026-11-01",
+  "updated": "2026-11-14",
   "relatedTool": "cron-generator",
   "body": [
     {
@@ -48,6 +49,62 @@
     {
       "type": "p",
       "text": "The midnight entry is easy to misread. `0 0 * * 1` fires at the start of Monday, so for a job that should summarize last week, the run happens just after Sunday ends."
+    },
+    {
+      "type": "h2",
+      "text": "Every Monday in crontab, GitHub Actions, Kubernetes and Node.js"
+    },
+    {
+      "type": "h3",
+      "text": "crontab"
+    },
+    {
+      "type": "code",
+      "lang": "bash",
+      "text": "# m h dom mon dow  command\n0 9 * * 1 /usr/local/bin/weekly-report.sh >> /var/log/weekly-report.log 2>&1"
+    },
+    {
+      "type": "p",
+      "text": "Add the line with `crontab -e`. It runs at 09:00 in the server's time zone every Monday."
+    },
+    {
+      "type": "h3",
+      "text": "GitHub Actions"
+    },
+    {
+      "type": "code",
+      "lang": "yaml",
+      "text": "on:\n  schedule:\n    # 09:00 Monday in Seoul (UTC+9) is 00:00 Monday UTC\n    - cron: '0 0 * * 1'\n  workflow_dispatch:"
+    },
+    {
+      "type": "p",
+      "text": "GitHub Actions evaluates `schedule` in UTC by default, so convert your local time first, and check whether the conversion crosses midnight. Monday 9:00 AM in New York is 14:00 UTC in winter (EST) but 13:00 UTC in summer (EDT), so a fixed `0 14 * * 1` drifts by an hour twice a year. In zones well ahead of UTC the day can change too: Monday 8:00 AM in Sydney (AEST, UTC+10) is Sunday 22:00 UTC, which is `0 22 * * 0`."
+    },
+    {
+      "type": "h3",
+      "text": "Kubernetes CronJob"
+    },
+    {
+      "type": "code",
+      "lang": "yaml",
+      "text": "apiVersion: batch/v1\nkind: CronJob\nmetadata:\n  name: weekly-report\nspec:\n  schedule: \"0 9 * * 1\"\n  timeZone: \"America/New_York\"\n  jobTemplate:\n    spec:\n      template:\n        spec:\n          restartPolicy: OnFailure\n          containers:\n            - name: report\n              image: busybox:1.36\n              command: [\"sh\", \"-c\", \"echo building weekly report\"]"
+    },
+    {
+      "type": "p",
+      "text": "With `timeZone` set, the job runs at 09:00 New York time all year, and Kubernetes handles the switch between EST and EDT. Without it, the schedule uses the controller's time zone, usually UTC."
+    },
+    {
+      "type": "h3",
+      "text": "Node.js"
+    },
+    {
+      "type": "code",
+      "lang": "javascript",
+      "text": "import cron from 'node-cron';\n\ncron.schedule('0 9 * * 1', () => {\n  sendWeeklyReport();\n}, { timezone: 'Europe/London' });"
+    },
+    {
+      "type": "p",
+      "text": "node-cron only fires while your Node.js process is running, so a restart during Monday 09:00 means the run is missed. For reports that must not be skipped, use system cron or a Kubernetes CronJob."
     },
     {
       "type": "h2",
@@ -188,6 +245,14 @@
     {
       "type": "p",
       "text": "Not with a single five-field expression. Run the job weekly and have the script check the ISO week number, or use a scheduler that supports intervals."
+    },
+    {
+      "type": "h3",
+      "text": "How do I run a GitHub Actions workflow every Monday?"
+    },
+    {
+      "type": "p",
+      "text": "Add a `schedule` trigger with `- cron: '0 9 * * 1'` under `on:`. That runs at 09:00 UTC, so convert your local time to UTC first and check whether the conversion moves the job to Sunday or Tuesday. Preview the result in the [Cron Expression Generator](/cron-generator)."
     }
   ]
 }

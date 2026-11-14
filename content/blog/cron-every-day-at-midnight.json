@@ -1,8 +1,9 @@
 {
   "slug": "cron-every-day-at-midnight",
-  "title": "Cron Every Day at Midnight: 0 0 * * * and Other Daily Schedules",
-  "description": "Use 0 0 * * * to run a cron job every day at midnight. Learn how it works, timezone pitfalls, and ready-made expressions for other daily schedules.",
+  "title": "Cron Expression for Every Day at Midnight (0 0 * * *)",
+  "description": "The cron expression for every day at midnight is 0 0 * * *. See it in crontab, GitHub Actions, Kubernetes CronJob and Node.js, plus timezone pitfalls.",
   "published": "2026-10-31",
+  "updated": "2026-11-14",
   "relatedTool": "cron-generator",
   "body": [
     {
@@ -47,6 +48,53 @@
     {
       "type": "p",
       "text": "These are not part of POSIX, so don't assume they work everywhere. Schedulers like GitHub Actions expect plain 5-field expressions. Check your platform's docs, or just use `0 0 * * *`, which works almost everywhere."
+    },
+    {
+      "type": "h2",
+      "text": "Midnight cron in GitHub Actions, Kubernetes and Node.js"
+    },
+    {
+      "type": "p",
+      "text": "The expression stays `0 0 * * *` on every platform that uses 5-field cron. What changes is where you write it and which time zone \"midnight\" is measured in."
+    },
+    {
+      "type": "h3",
+      "text": "GitHub Actions"
+    },
+    {
+      "type": "code",
+      "lang": "yaml",
+      "text": "name: nightly\n\non:\n  schedule:\n    - cron: '0 0 * * *'\n  workflow_dispatch:\n\njobs:\n  cleanup:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: ./scripts/nightly.sh"
+    },
+    {
+      "type": "p",
+      "text": "By default, GitHub Actions evaluates `schedule` in UTC, so `0 0 * * *` is midnight UTC: 9:00 AM in Seoul, and 7:00 PM (EST) or 8:00 PM (EDT) the previous evening in New York. For midnight in a UTC+9 zone, shift the hour back 9 hours: `0 15 * * *`. Scheduled runs use the workflow file on the default branch and can start several minutes late when GitHub is busy. The `workflow_dispatch` trigger lets you run the job by hand to test it."
+    },
+    {
+      "type": "h3",
+      "text": "Kubernetes CronJob"
+    },
+    {
+      "type": "code",
+      "lang": "yaml",
+      "text": "apiVersion: batch/v1\nkind: CronJob\nmetadata:\n  name: nightly-cleanup\nspec:\n  schedule: \"0 0 * * *\"\n  timeZone: \"Asia/Seoul\"\n  concurrencyPolicy: Forbid\n  jobTemplate:\n    spec:\n      template:\n        spec:\n          restartPolicy: OnFailure\n          containers:\n            - name: cleanup\n              image: busybox:1.36\n              command: [\"sh\", \"-c\", \"echo running nightly cleanup\"]"
+    },
+    {
+      "type": "p",
+      "text": "`timeZone` takes an IANA zone name and is stable since Kubernetes 1.27. Without it, the schedule follows the time zone of the kube-controller-manager, which is usually UTC. Don't put `CRON_TZ=` or `TZ=` inside `schedule`: Kubernetes doesn't support it and newer versions reject it. `concurrencyPolicy: Forbid` skips a night if the previous run is still going."
+    },
+    {
+      "type": "h3",
+      "text": "Node.js"
+    },
+    {
+      "type": "code",
+      "lang": "javascript",
+      "text": "import cron from 'node-cron';\n\ncron.schedule('0 0 * * *', () => {\n  console.log('nightly job', new Date().toISOString());\n}, { timezone: 'America/New_York' });"
+    },
+    {
+      "type": "p",
+      "text": "node-cron runs inside your Node.js process, so the job only fires while that process is running. It suits a long-running server, not serverless functions. The `timezone` option takes an IANA zone name; without it the process's local time zone is used. For work that must survive restarts and deploys, use system cron, a Kubernetes CronJob or your platform's scheduler instead."
     },
     {
       "type": "h2",
@@ -216,6 +264,14 @@
     {
       "type": "p",
       "text": "Nothing. In implementations that support them, both are aliases for `0 0 * * *`."
+    },
+    {
+      "type": "h3",
+      "text": "What is the cron expression for midnight in GitHub Actions?"
+    },
+    {
+      "type": "p",
+      "text": "`0 0 * * *` is midnight UTC. For midnight in your own zone, shift the hour by your UTC offset: `0 15 * * *` for midnight in Seoul (UTC+9), or `0 5 * * *` for midnight EST in New York (UTC-5), which becomes 1:00 AM local time during daylight saving time. Check any expression in the [Cron Expression Generator](/cron-generator)."
     }
   ]
 }

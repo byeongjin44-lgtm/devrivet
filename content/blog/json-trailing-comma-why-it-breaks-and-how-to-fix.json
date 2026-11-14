@@ -1,8 +1,9 @@
 {
   "slug": "json-trailing-comma-why-it-breaks-and-how-to-fix",
-  "title": "JSON Trailing Comma: Why It Breaks and How to Fix It",
-  "description": "A trailing comma makes JSON invalid. Learn why JSON.parse and other parsers reject it, how to find and remove it, and when trailing commas are allowed.",
+  "title": "Trailing Comma in JSON: Why JSON.parse Fails and How to Fix It",
+  "description": "A trailing comma makes JSON invalid. See the exact JSON.parse and Python errors, how to find and remove the comma safely, and when trailing commas are allowed.",
   "published": "2026-11-02",
+  "updated": "2026-11-14",
   "relatedTool": "json-formatter",
   "body": [
     {
@@ -45,12 +46,12 @@
     },
     {
       "type": "p",
-      "text": "The message depends on the parser and its version, so treat the wording below as examples. The position almost always points at the closing } or ] or at the comma just before it."
+      "text": "The message depends on the parser and its version, so treat the wording below as examples. These are from a current Node.js release. The position almost always points at the closing } or ] or at the comma just before it."
     },
     {
       "type": "code",
       "lang": "javascript",
-      "text": "JSON.parse('{\"a\": 1,}')\n// SyntaxError: Expected double-quoted property name in JSON at position 8"
+      "text": "JSON.parse('{\"a\": 1,}')\n// SyntaxError: Expected double-quoted property name in JSON at position 8 (line 1 column 9)\n\nJSON.parse('[1, 2,]')\n// SyntaxError: Unexpected token ']', \"[1, 2,]\" is not valid JSON"
     },
     {
       "type": "code",
@@ -101,6 +102,11 @@
       "text": "In a short file you can spot the problem by eye. In a long one, use the line and column from your parser or validator and look just before the closing bracket. Common places to find them:"
     },
     {
+      "type": "code",
+      "lang": "bash",
+      "text": "# Node.js: recent versions report the line and column\nnode -e \"JSON.parse(require('fs').readFileSync('config.json', 'utf8'))\"\n\n# Python: pretty-prints valid JSON, or reports line and column\npython -m json.tool config.json\n\n# jq: fails with a parse error on invalid JSON\njq . config.json"
+    },
+    {
       "type": "ul",
       "items": [
         "The last key in an object that was added by copy and paste.",
@@ -120,7 +126,25 @@
     },
     {
       "type": "p",
-      "text": "This pattern also matches text inside strings. For example, \"[a, ]\" as a string value would be altered. It also cannot handle comments or other non-JSON syntax. For anything you didn't write yourself, fix the file manually or use a proper parser."
+      "text": "The problem is that this pattern also matches text inside strings. Here it silently changes a value:"
+    },
+    {
+      "type": "code",
+      "lang": "javascript",
+      "text": "const text = '{\"tags\": [\"a, ]\", \"b\",]}';\n\ntext.replace(/,\\s*([}\\]])/g, '$1');\n// '{\"tags\": [\"a]\", \"b\"]}'  <- the string \"a, ]\" became \"a]\""
+    },
+    {
+      "type": "p",
+      "text": "A safer approach walks the text once and skips anything inside double-quoted strings, removing a comma only when the next non-space character is } or ]:"
+    },
+    {
+      "type": "code",
+      "lang": "javascript",
+      "text": "function removeTrailingCommas(text) {\n  let out = '';\n  let inString = false;\n  for (let i = 0; i < text.length; i++) {\n    const ch = text[i];\n    if (inString) {\n      out += ch;\n      if (ch === '\\\\') out += text[++i]; // keep escaped chars, e.g. \\\"\n      else if (ch === '\"') inString = false;\n    } else if (ch === '\"') {\n      inString = true;\n      out += ch;\n    } else if (ch === ',') {\n      let j = i + 1;\n      while (/\\s/.test(text[j] ?? '')) j++;\n      if (text[j] !== '}' && text[j] !== ']') out += ch;\n    } else {\n      out += ch;\n    }\n  }\n  return out;\n}\n\nJSON.parse(removeTrailingCommas('{\"tags\": [\"a, ]\", \"b\",]}'));\n// { tags: [ 'a, ]', 'b' ] }"
+    },
+    {
+      "type": "p",
+      "text": "It does not understand comments or single-quoted strings. For files that use those, parse them with a JSON5 or JSONC parser instead, and fix anything you didn't write yourself by hand."
     },
     {
       "type": "h2",
@@ -139,6 +163,15 @@
         "VS Code settings files are parsed as JSONC, so trailing commas are accepted there.",
         "Standard JSON parsers such as JSON.parse, json.loads, and most APIs do not accept them."
       ]
+    },
+    {
+      "type": "p",
+      "text": "To read a JSON5 file and write strict JSON back out, parse it with the json5 package and serialize it with `JSON.stringify`:"
+    },
+    {
+      "type": "code",
+      "lang": "javascript",
+      "text": "import fs from 'node:fs';\nimport JSON5 from 'json5';\n\nJSON5.parse('{\"a\": 1,}'); // { a: 1 }\nJSON5.parse('[1, 2,]');   // [ 1, 2 ]\n\nconst data = JSON5.parse(fs.readFileSync('config.json5', 'utf8'));\nfs.writeFileSync('config.json', JSON.stringify(data, null, 2) + '\\n');"
     },
     {
       "type": "p",

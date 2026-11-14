@@ -433,14 +433,82 @@ describe("blog posts", () => {
     }
   });
 
-  it("cron-every-5-minutes only documents valid cron expressions", () => {
-    const post = POSTS.find((p) => p.slug === "cron-every-5-minutes")!;
-    const expressions = post.body
+  /** 5-field expressions in a post: `inline code`, the last line of a code block, quoted YAML values, crontab lines. */
+  function cronExpressions(slug: string) {
+    const post = POSTS.find((p) => p.slug === slug)!;
+    const FIELD = "[\\d*/,-]+";
+    const EXPR = new RegExp(`^${FIELD}( ${FIELD}){4}$`);
+    return post.body
       .flatMap((b) => (b.type === "code" ? [b.text] : b.type === "ul" ? b.items : b.type === "p" ? [b.text] : []))
-      .flatMap((text) => [...text.matchAll(/`([^`]+)`/g)].map((m) => m[1]).concat(text.split("\n").at(-1) ?? []))
-      .filter((s) => /^[\d*/,-]+( [\d*/,-]+){4}$/.test(s));
-    expect(expressions).toEqual(expect.arrayContaining(["*/5 * * * *", "*/5 9-17 * * 1-5", "2-59/5 * * * *", "*/7 * * * *"]));
+      .flatMap((text) => [
+        ...[...text.matchAll(/`([^`]+)`|'([^'\n]+)'|"([^"\n]+)"/g)].map((m) => m[1] ?? m[2] ?? m[3]),
+        // A crontab line's 6th token is the command; if it looks like a field, it's 6-field (Quartz/Spring) cron.
+        ...text
+          .split("\n")
+          .map((line) => line.split(/\s+/))
+          .filter((tokens) => tokens.length <= 5 || !/^[\d*/,?-]+$/.test(tokens[5]))
+          .map((tokens) => tokens.slice(0, 5).join(" ")),
+      ])
+      .filter((s) => EXPR.test(s));
+  }
+
+  it.each([
+    ["cron-every-5-minutes", ["*/5 * * * *", "*/5 9-17 * * 1-5", "2-59/5 * * * *", "*/7 * * * *"]],
+    ["cron-every-day-at-midnight", ["0 0 * * *", "0 15 * * *", "0 5 * * *", "59 23 * * *"]],
+    ["cron-every-monday-weekly-schedule", ["0 9 * * 1", "0 0 * * 1", "0 14 * * 1", "0 22 * * 0"]],
+  ])("%s only documents valid cron expressions", (slug, expected) => {
+    const expressions = cronExpressions(slug);
+    expect(expressions).toEqual(expect.arrayContaining(expected));
     for (const expr of expressions) expect(validateCronExpression(expr), expr).toEqual({ valid: true });
+  });
+
+  /** Runs a post's code block (found by its first line) and returns the named function from it. */
+  function postFunction<T>(slug: string, firstLine: string, name: string, ...globals: [string, unknown][]): T {
+    const post = POSTS.find((p) => p.slug === slug)!;
+    const block = post.body.find((b) => b.type === "code" && b.text.startsWith(firstLine));
+    if (!block || block.type !== "code") throw new Error(`no code block starting with ${firstLine}`);
+    const names = globals.map(([n]) => n);
+    return new Function(...names, `${block.text}\nreturn ${name};`)(...globals.map(([, v]) => v)) as T;
+  }
+
+  it("json-trailing-comma code examples produce the outputs the post shows", () => {
+    const text = '{"tags": ["a, ]", "b",]}';
+    expect(text.replace(/,\s*([}\]])/g, "$1")).toBe('{"tags": ["a]", "b"]}');
+    const removeTrailingCommas = postFunction<(t: string) => string>(
+      "json-trailing-comma-why-it-breaks-and-how-to-fix",
+      "function removeTrailingCommas",
+      "removeTrailingCommas",
+    );
+    expect(JSON.parse(removeTrailingCommas(text))).toEqual({ tags: ["a, ]", "b"] });
+    expect(JSON.parse(removeTrailingCommas('{\n  "note": "say \\"hi\\",}",\n  "n": [1, 2, ],\n}'))).toEqual({
+      note: 'say "hi",}',
+      n: [1, 2],
+    });
+    expect(() => JSON.parse('{"a": 1,}')).toThrow(SyntaxError);
+    expect(() => JSON.parse("[1, 2,]")).toThrow(SyntaxError);
+  });
+
+  it("jwt-expiration code examples decode exp the way the post says", () => {
+    const b64url = (o: object) => Buffer.from(JSON.stringify(o)).toString("base64url");
+    const token = `${b64url({ alg: "HS256" })}.${b64url({ name: "José", iat: 1700000000, exp: 1700003600 })}.sig`;
+    const quiet = { log: () => {} };
+    const getClaims = postFunction<(t: string) => Record<string, unknown>>(
+      "jwt-expiration-time-check-exp-claim",
+      "function getClaims",
+      "getClaims",
+      ["token", token],
+      ["console", quiet],
+    );
+    expect(getClaims(token)).toEqual({ name: "José", iat: 1700000000, exp: 1700003600 });
+    const secondsUntilExpiry = postFunction<(c: object, now?: number) => number | null>(
+      "jwt-expiration-time-check-exp-claim",
+      "const payload = token.split",
+      "secondsUntilExpiry",
+      ["token", token],
+    );
+    expect(secondsUntilExpiry({ exp: 1700003600 }, 1700000000)).toBe(3600);
+    expect(secondsUntilExpiry({}, 1700000000)).toBeNull();
+    expect(new Date(1700003600 * 1000).toISOString()).toBe("2023-11-14T23:13:20.000Z");
   });
 });
 

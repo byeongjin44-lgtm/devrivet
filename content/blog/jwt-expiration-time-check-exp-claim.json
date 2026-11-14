@@ -1,8 +1,9 @@
 {
   "slug": "jwt-expiration-time-check-exp-claim",
-  "title": "JWT Expiration Time: How to Check the exp Claim",
-  "description": "Read the exp claim in a JWT payload. It is a Unix timestamp in seconds (UTC). Convert it to a date, then compare it with the current time.",
+  "title": "How to Check JWT Expiration Time (exp Claim)",
+  "description": "The JWT exp claim is a Unix timestamp in seconds (UTC). Check it in JavaScript, Node.js and Python by decoding the payload and comparing exp with now.",
   "published": "2026-11-04",
+  "updated": "2026-11-14",
   "relatedTool": "jwt-decoder",
   "body": [
     {
@@ -44,11 +45,28 @@
     {
       "type": "code",
       "lang": "javascript",
-      "text": "function getClaims(token) {\n  const payload = token.split('.')[1];\n  const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');\n  return JSON.parse(atob(base64));\n}\n\nconst claims = getClaims(token);\nconst expiresAt = new Date(claims.exp * 1000);\nconst isExpired = Date.now() >= claims.exp * 1000;\n\nconsole.log(expiresAt.toISOString());\nconsole.log(isExpired ? 'expired' : 'still valid');"
+      "text": "function getClaims(token) {\n  const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');\n  const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));\n  return JSON.parse(new TextDecoder().decode(bytes));\n}\n\nconst claims = getClaims(token);\nconst expiresAt = new Date(claims.exp * 1000);\nconst isExpired = Date.now() >= claims.exp * 1000;\n\nconsole.log(expiresAt.toISOString());\nconsole.log(isExpired ? 'expired' : 'still valid');"
     },
     {
       "type": "p",
-      "text": "`atob` returns a binary string, not UTF-8. If the payload contains non-ASCII characters, such as a name with accents, the decoded text will be garbled. For full UTF-8 support, decode the bytes with a `TextDecoder` or use the [Base64 Encoder / Decoder](/base64), which handles UTF-8."
+      "text": "`atob` returns one character per byte, not UTF-8 text, so the bytes go through `TextDecoder` before `JSON.parse`. Without that step, a claim with non-ASCII characters, such as the name `José`, comes out garbled. The function works in browsers and in Node.js 18 and later."
+    },
+    {
+      "type": "h2",
+      "text": "Read the exp claim in Node.js"
+    },
+    {
+      "type": "p",
+      "text": "Node's `Buffer` decodes base64url directly, so no character replacement is needed:"
+    },
+    {
+      "type": "code",
+      "lang": "javascript",
+      "text": "const payload = token.split('.')[1];\nconst claims = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));\n\nfunction secondsUntilExpiry(claims, now = Math.floor(Date.now() / 1000)) {\n  if (typeof claims.exp !== 'number') return null; // no exp claim\n  return claims.exp - now; // 0 or less means expired\n}"
+    },
+    {
+      "type": "p",
+      "text": "For a token with `iat` 1700000000 and `exp` 1700003600, the lifetime is 3600 seconds (one hour), `new Date(1700003600 * 1000).toISOString()` is `2023-11-14T23:13:20.000Z`, and `secondsUntilExpiry(claims, 1700000000)` returns `3600`."
     },
     {
       "type": "h2",
@@ -98,6 +116,28 @@
     {
       "type": "p",
       "text": "The [JWT Decoder](/jwt-decoder) reads the header and payload and shows dates, but it does not verify the signature. In your application, verify the signature with the trusted key and let your JWT library check `exp` as part of verification. Never make an authorization decision based only on a decoded payload."
+    },
+    {
+      "type": "h2",
+      "text": "Let a JWT library check exp"
+    },
+    {
+      "type": "p",
+      "text": "In production, verify the signature and check `exp` in one step. Both libraries below reject an expired token with a specific error, and both accept a small leeway for clock skew."
+    },
+    {
+      "type": "code",
+      "lang": "javascript",
+      "text": "import jwt from 'jsonwebtoken';\n\ntry {\n  const claims = jwt.verify(token, secret, { algorithms: ['HS256'], clockTolerance: 30 });\n  console.log('valid until', new Date(claims.exp * 1000).toISOString());\n} catch (err) {\n  if (err.name === 'TokenExpiredError') {\n    console.log('expired at', err.expiredAt.toISOString());\n  } else {\n    throw err;\n  }\n}"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "import jwt  # PyJWT\n\ntry:\n    claims = jwt.decode(\n        token,\n        secret,\n        algorithms=[\"HS256\"],\n        leeway=30,\n        options={\"require\": [\"exp\"]},\n    )\nexcept jwt.ExpiredSignatureError:\n    print(\"token expired\")"
+    },
+    {
+      "type": "p",
+      "text": "`clockTolerance` and `leeway` are in seconds. Passing `algorithms` explicitly stops a token from choosing its own algorithm. PyJWT's `require` option also rejects tokens that have no `exp` at all, which the plain decode-and-compare approach above has to handle itself."
     },
     {
       "type": "h2",

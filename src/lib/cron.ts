@@ -19,6 +19,12 @@ export const CRON_PRESETS: CronPreset[] = [
   { label: "Every month", expression: "0 0 1 * *" },
 ];
 
+/** The preset whose expression is the given one (extra spaces ignored), or undefined. */
+export function findPreset(expression: string): CronPreset | undefined {
+  const normalized = expression.trim().split(/\s+/).join(" ");
+  return CRON_PRESETS.find((preset) => preset.expression === normalized);
+}
+
 export type CronFields = {
   minute: string;
   hour: string;

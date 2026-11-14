@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  CRON_PRESETS,
+  findPreset,
   CronError,
   buildCronExpression,
   explainCronExpression,
@@ -77,5 +79,22 @@ describe("getNextRuns", () => {
 
   it("throws CronError for invalid expressions", () => {
     expect(() => getNextRuns("not a cron", 5, "UTC")).toThrow(CronError);
+  });
+});
+
+describe("findPreset", () => {
+  it("matches a preset expression, ignoring extra spaces", () => {
+    expect(findPreset("*/5 * * * *")?.label).toBe("Every 5 minutes");
+    expect(findPreset("  0  0 * * 1-5 ")?.label).toBe("Every weekday");
+  });
+
+  it("returns undefined for anything that is not exactly a preset", () => {
+    expect(findPreset("0 9 * * 1-5")).toBeUndefined();
+    expect(findPreset("*/5 * * *")).toBeUndefined();
+    expect(findPreset("")).toBeUndefined();
+  });
+
+  it("every preset finds itself", () => {
+    for (const preset of CRON_PRESETS) expect(findPreset(preset.expression)).toBe(preset);
   });
 });

@@ -7,6 +7,7 @@ import {
   type CronFields,
   buildCronExpression,
   explainCronExpression,
+  findPreset,
   getNextRuns,
   validateCronExpression,
 } from "@/lib/cron";
@@ -63,6 +64,8 @@ export function CronTool() {
   }
 
   const validation = expression.trim() ? validateCronExpression(expression) : null;
+  // Derived from the expression, so the highlight disappears as soon as the user edits it away from a preset.
+  const activePreset = findPreset(expression);
 
   const explanation = useMemo(() => {
     if (!validation?.valid) return null;
@@ -88,16 +91,25 @@ export function CronTool() {
       <section className="flex flex-col gap-4">
         <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Presets</h2>
         <div className="flex flex-wrap gap-2">
-          {CRON_PRESETS.map((preset) => (
-            <button
-              key={preset.label}
-              type="button"
-              onClick={() => applyPreset(preset.expression)}
-              className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-            >
-              {preset.label}
-            </button>
-          ))}
+          {CRON_PRESETS.map((preset) => {
+            const active = preset === activePreset;
+            return (
+              <button
+                key={preset.label}
+                type="button"
+                aria-pressed={active}
+                onClick={() => applyPreset(preset.expression)}
+                className={
+                  active
+                    ? "rounded-md border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+                    : "rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                }
+              >
+                {active && <span aria-hidden="true">✓ </span>}
+                {preset.label}
+              </button>
+            );
+          })}
         </div>
 
         <h2 className="mt-2 text-sm font-semibold text-zinc-900 dark:text-zinc-50">Custom</h2>

@@ -327,6 +327,10 @@ describe("documented examples", () => {
     const text = pageText("/url-encoder");
     expect(text).toContain(ko);
     expect(text).toContain("a b+c encodes to a%20b%2Bc");
+    const sample = "https://example.com/a b?q=1&r=a/b#top";
+    expect(text).toContain(encodeURI(sample));
+    expect(text).toContain(encodeUrlComponent(sample));
+    expect(text).toContain(encodeUrlComponent("é"));
   });
 
   it("Timestamp", () => {
@@ -378,6 +382,19 @@ describe("documented examples", () => {
     expect(text).toContain("2025-12 at index 26");
     expect(text).toContain("Regular expression timed out. The pattern may cause excessive backtracking.");
     expect(text).toContain("about 1.5 seconds");
+    // Common-patterns examples must match what the engine actually returns.
+    const examples: [string, string, string, string[]][] = [
+      ["-?\\d+(?:\\.\\d+)?", "g", "Temp -12.5 C, max 30", ["-12.5", "30"]],
+      ["[^\\s@]+@[^\\s@]+\\.[^\\s@]+", "g", "mail dev@example.com today", ["dev@example.com"]],
+      ["#(?:[0-9a-fA-F]{3}){1,2}\\b", "g", "color: #fff; border: #1a2b3c;", ["#fff", "#1a2b3c"]],
+      ["\\b(\\w+)\\s+\\1\\b", "gi", "This is is a test Test", ["is is", "test Test"]],
+      ["^\\w+", "gm", "one\ntwo", ["one", "two"]],
+    ];
+    for (const [pattern, flags, input, expected] of examples) {
+      expect(text).toContain(pattern);
+      const r = testRegex(pattern, flags, input);
+      expect(r.ok && r.matches.map((m) => m.text)).toEqual(expected);
+    }
   });
 });
 

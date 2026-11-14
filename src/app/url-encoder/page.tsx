@@ -7,6 +7,8 @@ const tool = TOOLS.find((t) => t.slug === "url-encoder")!;
 
 export const metadata = toolMetadata(tool);
 
+const code = "rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800";
+
 export default function UrlEncoderPage() {
   return (
     <ToolPageLayout
@@ -18,12 +20,86 @@ export default function UrlEncoderPage() {
         <>
           <section>
             <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-              What is URL encoding?
+              What is URL percent encoding?
             </h2>
             <p>
               URL encoding (percent-encoding) replaces characters that aren&apos;t safe inside a URL —
               spaces, &amp;, =, and others — with a % followed by their hex code. This lets arbitrary text
               be safely embedded as a query parameter value or path segment.
+            </p>
+            <p className="mt-2">
+              The rules come from RFC 3986. Letters, digits and{" "}
+              <code className={code}>- . _ ~</code> are <em>unreserved</em> and never need encoding.
+              Characters such as <code className={code}>: / ? # &amp; = +</code> are <em>reserved</em>:
+              they have a structural meaning in a URL, so they must be encoded when they appear inside a
+              value. Every other character is first converted to its UTF-8 bytes, and each byte is written
+              as <code className={code}>%</code> plus two hex digits — <code className={code}>é</code>{" "}
+              becomes <code className={code}>%C3%A9</code> and a space becomes{" "}
+              <code className={code}>%20</code>.
+            </p>
+          </section>
+          <section>
+            <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              encodeURIComponent vs encodeURI
+            </h2>
+            <p>
+              JavaScript has two built-in percent-encoding functions. The difference is which reserved
+              characters they leave alone.
+            </p>
+            <div className="mt-2 overflow-x-auto">
+              <table className="w-full min-w-[28rem] border-collapse text-left text-sm">
+                <thead>
+                  <tr className="border-b border-zinc-200 dark:border-zinc-800">
+                    <th className="py-1.5 pr-3 font-medium text-zinc-900 dark:text-zinc-50"></th>
+                    <th className="py-1.5 pr-3 font-medium text-zinc-900 dark:text-zinc-50">encodeURIComponent</th>
+                    <th className="py-1.5 font-medium text-zinc-900 dark:text-zinc-50">encodeURI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-zinc-200 dark:border-zinc-800">
+                    <td className="py-1.5 pr-3">Use for</td>
+                    <td className="py-1.5 pr-3">One value: a query parameter or path segment</td>
+                    <td className="py-1.5">A whole URL whose structure must survive</td>
+                  </tr>
+                  <tr className="border-b border-zinc-200 dark:border-zinc-800">
+                    <td className="py-1.5 pr-3">Leaves unencoded</td>
+                    <td className="py-1.5 pr-3 font-mono">A–Z a–z 0–9 - _ . ! ~ * &apos; ( )</td>
+                    <td className="py-1.5 font-mono">the same, plus ; , / ? : @ &amp; = + $ #</td>
+                  </tr>
+                  <tr>
+                    <td className="py-1.5 pr-3">Decoder</td>
+                    <td className="py-1.5 pr-3 font-mono">decodeURIComponent</td>
+                    <td className="py-1.5 font-mono">decodeURI</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-3">
+              Given <code className={`${code} break-all`}>https://example.com/a b?q=1&amp;r=a/b#top</code>:
+            </p>
+            <ul className="mt-1 list-disc space-y-1 pl-5">
+              <li>
+                <code className={code}>encodeURI</code> gives{" "}
+                <code className={`${code} break-all`}>https://example.com/a%20b?q=1&amp;r=a/b#top</code> —
+                only the space changes, so the URL still works.
+              </li>
+              <li>
+                <code className={code}>encodeURIComponent</code> gives{" "}
+                <code className={`${code} break-all`}>
+                  https%3A%2F%2Fexample.com%2Fa%20b%3Fq%3D1%26r%3Da%2Fb%23top
+                </code>{" "}
+                — everything is escaped, which is what you want when this whole URL is itself the value of a
+                parameter, such as a <code className={code}>?redirect=</code> target.
+              </li>
+            </ul>
+            <p className="mt-2">
+              The common bug is using <code className={code}>encodeURI</code> on a single value: a value of{" "}
+              <code className={code}>a&amp;b</code> stays <code className={code}>a&amp;b</code> and splits
+              into two query parameters. Build query strings with{" "}
+              <code className={code}>encodeURIComponent</code> for each value, or with{" "}
+              <code className={code}>URLSearchParams</code> — note that{" "}
+              <code className={code}>URLSearchParams</code> writes spaces as{" "}
+              <code className={code}>+</code> (form encoding), not <code className={code}>%20</code>.
             </p>
           </section>
           <section>

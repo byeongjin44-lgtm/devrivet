@@ -140,7 +140,7 @@ export const TOOLS: ToolDefinition[] = [
     shortDescription: "Test JavaScript regular expressions with match highlighting and capture groups.",
     title: `JavaScript Regex Tester — ${SITE_NAME}`,
     metaDescription:
-      "Test JavaScript regular expressions with g, i, m, s and u flags, highlighted matches, and numbered and named capture groups. Runs in your browser with a safety timeout.",
+      "JavaScript regex tester: test a RegExp with g, i, m, s and u flags and see every match, index and capture group highlighted. Free, runs in your browser.",
     related: [],
   },
   {

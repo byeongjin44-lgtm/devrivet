@@ -12,8 +12,8 @@ const code = "rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-800";
 export default function RegexTesterPage() {
   return (
     <ToolPageLayout
-      title={tool.name}
-      description="A JavaScript regular expression tester: see every match, its index and capture groups, highlighted in your text."
+      title="JavaScript Regex Tester"
+      description="Test JavaScript regular expressions online: see every match, its index and capture groups, highlighted in your text."
       path={tool.path}
       tool={<RegexTesterTool />}
       info={
@@ -46,9 +46,17 @@ export default function RegexTesterPage() {
             <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
               JavaScript regex flags
             </h2>
+            <p className="mb-2">
+              In JavaScript, flags go after the closing slash of a regex literal (
+              <code className={code}>/\d+/gi</code>) or in the second argument of the constructor (
+              <code className={code}>new RegExp(&quot;\\d+&quot;, &quot;gi&quot;)</code>). Read them back from{" "}
+              <code className={code}>regex.flags</code>.
+            </p>
             <ul className="list-disc space-y-1 pl-5">
               <li>
                 <code className={code}>g</code> — global: find all matches instead of stopping at the first.
+                Required by <code className={code}>String.prototype.matchAll</code> and{" "}
+                <code className={code}>replaceAll</code> with a regex.
               </li>
               <li>
                 <code className={code}>i</code> — ignore case: <code className={code}>a</code> also matches{" "}
@@ -56,7 +64,10 @@ export default function RegexTesterPage() {
               </li>
               <li>
                 <code className={code}>m</code> — multiline: <code className={code}>^</code> and{" "}
-                <code className={code}>$</code> match at the start and end of each line.
+                <code className={code}>$</code> match at the start and end of each line. For example,{" "}
+                <code className={code}>^\w+</code> on two lines <code className={code}>one</code> /{" "}
+                <code className={code}>two</code> finds only <code className={code}>one</code> without{" "}
+                <code className={code}>m</code>, and both words with it.
               </li>
               <li>
                 <code className={code}>s</code> — dotAll: <code className={code}>.</code> also matches
@@ -65,6 +76,65 @@ export default function RegexTesterPage() {
               <li>
                 <code className={code}>u</code> — unicode: treats emoji and other astral characters as one
                 character and enables <code className={code}>\p&#123;...&#125;</code> property escapes.
+              </li>
+              <li>
+                <code className={code}>y</code> — sticky: a match must start exactly at{" "}
+                <code className={code}>regex.lastIndex</code> instead of searching ahead. With{" "}
+                <code className={code}>lastIndex = 3</code>, <code className={code}>/foo/y</code> matches{" "}
+                <code className={code}>barfoo</code>, but from index 0 it doesn&apos;t. It is mainly used
+                for writing tokenizers that consume input step by step, so this tester doesn&apos;t offer
+                it — test the pattern without <code className={code}>y</code>, then add it in your code.
+              </li>
+            </ul>
+          </section>
+          <section>
+            <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              Common regex patterns
+            </h2>
+            <p className="mb-2">
+              Paste any of these into the tester (without slashes) with the{" "}
+              <code className={code}>g</code> flag. They are practical starting points, not full validators.
+            </p>
+            <ul className="list-disc space-y-2 pl-5">
+              <li>
+                Number (optional sign and decimals):{" "}
+                <code className={`${code} break-all`}>-?\d+(?:\.\d+)?</code> — in{" "}
+                <code className={code}>Temp -12.5 C, max 30</code> matches <code className={code}>-12.5</code>{" "}
+                and <code className={code}>30</code>.
+              </li>
+              <li>
+                Email-like token: <code className={`${code} break-all`}>[^\s@]+@[^\s@]+\.[^\s@]+</code> —
+                finds <code className={code}>dev@example.com</code>. Real email validation is better left to
+                sending a confirmation message.
+              </li>
+              <li>
+                ISO date (YYYY-MM-DD): <code className={`${code} break-all`}>\d&#123;4&#125;-\d&#123;2&#125;-\d&#123;2&#125;</code>{" "}
+                — matches <code className={code}>2025-03-14</code>. It checks the shape only, so{" "}
+                <code className={code}>2025-13-99</code> also matches.
+              </li>
+              <li>
+                Hex color: <code className={`${code} break-all`}>#(?:[0-9a-fA-F]&#123;3&#125;)&#123;1,2&#125;\b</code>{" "}
+                — matches <code className={code}>#fff</code> and <code className={code}>#1a2b3c</code>.
+              </li>
+              <li>
+                IPv4 address (shape only):{" "}
+                <code className={`${code} break-all`}>\b(?:\d&#123;1,3&#125;\.)&#123;3&#125;\d&#123;1,3&#125;\b</code>{" "}
+                — matches <code className={code}>192.168.0.1</code>; it doesn&apos;t check that each part is
+                255 or less.
+              </li>
+              <li>
+                Repeated word: <code className={`${code} break-all`}>\b(\w+)\s+\1\b</code> with{" "}
+                <code className={code}>gi</code> — in <code className={code}>This is is a test Test</code>{" "}
+                finds <code className={code}>is is</code> and <code className={code}>test Test</code>.
+              </li>
+              <li>
+                URL slug: <code className={`${code} break-all`}>^[a-z0-9]+(?:-[a-z0-9]+)*$</code> — matches{" "}
+                <code className={code}>my-post-2025</code> but not <code className={code}>My Post</code>.
+              </li>
+              <li>
+                Leading or trailing whitespace: <code className={`${code} break-all`}>^\s+|\s+$</code> — the
+                pattern behind a manual trim, e.g.{" "}
+                <code className={code}>str.replace(/^\s+|\s+$/g, &quot;&quot;)</code>.
               </li>
             </ul>
           </section>

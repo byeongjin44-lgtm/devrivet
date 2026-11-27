@@ -1,0 +1,201 @@
+{
+  "slug": "btoa-invalid-character-error-fix",
+  "title": "Fix btoa Invalid Character Error in JavaScript",
+  "description": "The btoa() invalid character error happens when a string contains characters above code point 255. Encode the text to UTF-8 bytes first, then call btoa() to fix it.",
+  "published": "2026-11-27",
+  "relatedTool": "base64",
+  "body": [
+    {
+      "type": "p",
+      "text": "The error happens because `btoa()` only accepts strings where every character has a code point from 0 to 255. If your input contains anything outside that range, such as an emoji, a curly quote, or a Chinese character, the browser throws a `DOMException`. The fix is to encode the text as UTF-8 bytes first, convert those bytes into a binary string, and then pass that string to `btoa()`."
+    },
+    {
+      "type": "p",
+      "text": "If you just need a quick conversion and do not want to write code, paste the text into the [Base64 Encoder / Decoder](/base64), which handles UTF-8 for you."
+    },
+    {
+      "type": "h2",
+      "text": "What the error looks like"
+    },
+    {
+      "type": "p",
+      "text": "Calling `btoa()` with a plain ASCII string works:"
+    },
+    {
+      "type": "code",
+      "lang": "javascript",
+      "text": "btoa('hello')\n// 'aGVsbG8='"
+    },
+    {
+      "type": "p",
+      "text": "Calling it with a character outside Latin-1 throws. In current Chrome, the output looks like this:"
+    },
+    {
+      "type": "code",
+      "lang": "javascript",
+      "text": "btoa('hello 🙂')\n// Uncaught DOMException: Failed to execute 'btoa' on 'Window': The string to be encoded contains characters outside of the Latin1 range."
+    },
+    {
+      "type": "p",
+      "text": "The exact wording depends on the browser and runtime. Older Chrome versions and some other engines print different text, such as `Failed to execute btoa: Invalid character`, and Firefox reports an `InvalidCharacterError` with its own message. The wording changes, but the cause is the same: `btoa()` found a character it cannot represent as a single byte."
+    },
+    {
+      "type": "h2",
+      "text": "Why it happens"
+    },
+    {
+      "type": "p",
+      "text": "`btoa()` is defined to take a \"binary string\": a JavaScript string where each character represents one byte, with a value from 0 to 255. This is the Latin-1 range (ISO-8859-1). It was never meant for general text."
+    },
+    {
+      "type": "p",
+      "text": "JavaScript strings are UTF-16 internally. Characters like `é` (U+00E9, code point 233) fit in the range, so `btoa('é')` works, and it encodes the single byte `0xE9`, not the UTF-8 bytes `0xC3 0xA9` that most systems expect. Characters above 255, such as `€` (U+20AC) or emoji, do not fit at all, so `btoa()` rejects them."
+    },
+    {
+      "type": "p",
+      "text": "Here is what that means in practice:"
+    },
+    {
+      "type": "ul",
+      "items": [
+        "`btoa('é')` returns `6Q==`, which decodes to the single byte `0xE9`. A Python or Node.js decoder expecting UTF-8 will not read this as `é`.",
+        "`btoa('€')` throws, because U+20AC is greater than 255.",
+        "`btoa('abc')` returns `YWJj`. ASCII is safe because it is identical in UTF-8 and Latin-1."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "The fix: encode to UTF-8 bytes first"
+    },
+    {
+      "type": "p",
+      "text": "Base64 is meant to encode bytes. Text has to become bytes before you encode it, and the standard way to do that on the web is UTF-8. `TextEncoder` converts a string into a `Uint8Array` of UTF-8 bytes. You then turn each byte into a character with `String.fromCharCode()` and pass the result to `btoa()`, which now only sees values from 0 to 255."
+    },
+    {
+      "type": "code",
+      "lang": "javascript",
+      "text": "function utf8ToBase64(str) {\n  const bytes = new TextEncoder().encode(str);\n  let binary = '';\n  for (const byte of bytes) {\n    binary += String.fromCharCode(byte);\n  }\n  return btoa(binary);\n}\n\nutf8ToBase64('hello 🙂')\n// 'aGVsbG8g8J+Zgg=='\nutf8ToBase64('é')\n// 'w6k='"
+    },
+    {
+      "type": "p",
+      "text": "The `'é'` result `w6k=` decodes to the UTF-8 bytes `0xC3 0xA9`, which is what Python, Go, Java and most servers expect when they decode Base64 text."
+    },
+    {
+      "type": "p",
+      "text": "For large inputs, the character-by-character loop can be slow. You can build the binary string in chunks, but for most uses the loop is fine."
+    },
+    {
+      "type": "h2",
+      "text": "Decoding: atob returns a binary string, not text"
+    },
+    {
+      "type": "p",
+      "text": "The reverse operation has the same trap. `atob()` decodes Base64 into a binary string, one character per byte. If the original data was UTF-8 text, `atob()` returns mojibake (garbled characters) for anything outside ASCII."
+    },
+    {
+      "type": "code",
+      "lang": "javascript",
+      "text": "atob('w6k=')\n// 'Ã©'  (two characters, one per byte)"
+    },
+    {
+      "type": "p",
+      "text": "To get the original text back, convert the bytes to a `Uint8Array` and decode them with `TextDecoder`:"
+    },
+    {
+      "type": "code",
+      "lang": "javascript",
+      "text": "function base64ToUtf8(b64) {\n  const binary = atob(b64);\n  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));\n  return new TextDecoder().decode(bytes);\n}\n\nbase64ToUtf8('w6k=')\n// 'é'\nbase64ToUtf8('aGVsbG8g8J+Zgg==')\n// 'hello 🙂'"
+    },
+    {
+      "type": "p",
+      "text": "Keep in mind that `atob()` is only for Base64 that uses the standard alphabet with `+` and `/`. If your input uses the URL-safe alphabet (`-` and `_`), convert it first. See [Base64 vs Base64URL](/blog/base64-vs-base64url-differences-when-to-use) for the differences."
+    },
+    {
+      "type": "h2",
+      "text": "Encoding in other environments"
+    },
+    {
+      "type": "p",
+      "text": "The same bytes-first approach works outside the browser. The output is identical to the JavaScript version above."
+    },
+    {
+      "type": "code",
+      "lang": "javascript",
+      "text": "// Node.js\nBuffer.from('hello 🙂', 'utf8').toString('base64')\n// 'aGVsbG8g8J+Zgg=='"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "import base64\n\nbase64.b64encode('hello 🙂'.encode('utf-8')).decode('ascii')\n# 'aGVsbG8g8J+Zgg=='"
+    },
+    {
+      "type": "p",
+      "text": "Node's `Buffer` is the simplest option on the server. `Buffer` is a Node.js API and does not exist in browsers, so use `TextEncoder` in client-side code."
+    },
+    {
+      "type": "h2",
+      "text": "Older workaround and why to avoid it"
+    },
+    {
+      "type": "p",
+      "text": "Many older answers suggest `btoa(unescape(encodeURIComponent(str)))`. It works because `encodeURIComponent()` produces percent-encoded UTF-8 bytes, and `unescape()` turns each `%XX` into the matching Latin-1 character. However, `unescape()` is deprecated, and the pattern is harder to read than the `TextEncoder` version. Use it only when you must support very old environments."
+    },
+    {
+      "type": "h2",
+      "text": "Common pitfalls"
+    },
+    {
+      "type": "ul",
+      "items": [
+        "Passing a non-string value. `btoa()` converts its argument to a string, so `btoa({a: 1})` encodes `[object Object]`. Serialize objects with `JSON.stringify()` first.",
+        "Forgetting to decode with the same encoding. If you encode UTF-8 and decode as Latin-1, accented characters break. Always pair `TextEncoder` with `TextDecoder`.",
+        "Mixing up Base64 size. Base64 output is about a third larger than the input bytes. See [Base64 size increase](/blog/base64-size-increase-why-33-percent) for the math.",
+        "Pasting secrets into online converters. Tokens, API keys and private data should not go into any web tool unless you have confirmed how it handles input. When in doubt, encode locally with the code above."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Summary"
+    },
+    {
+      "type": "p",
+      "text": "`btoa()` only accepts characters from 0 to 255. For any other text, encode the string to UTF-8 bytes with `TextEncoder`, convert the bytes to a binary string, and then call `btoa()`. To decode, reverse the steps with `atob()`, `Uint8Array` and `TextDecoder`. For more background on Unicode in Base64, read [Base64 encode Unicode in JavaScript](/blog/base64-encode-unicode-javascript)."
+    },
+    {
+      "type": "h2",
+      "text": "FAQ"
+    },
+    {
+      "type": "h3",
+      "text": "Why does btoa work with some accented characters but not others?"
+    },
+    {
+      "type": "p",
+      "text": "Characters from U+0000 to U+00FF, which includes many Western European accented letters, fit in one byte, so `btoa()` accepts them. Characters above U+00FF, such as `€`, emoji, and most non-Latin scripts, do not fit and cause the error."
+    },
+    {
+      "type": "h3",
+      "text": "Is there a way to make btoa handle any string directly?"
+    },
+    {
+      "type": "p",
+      "text": "No. `btoa()` is limited to binary strings by design. Encode the text to bytes first, as shown above, or use a library or your language's built-in encoder."
+    },
+    {
+      "type": "h3",
+      "text": "Does the UTF-8 fix change the output for plain ASCII text?"
+    },
+    {
+      "type": "p",
+      "text": "No. ASCII characters have the same single-byte values in UTF-8, so `utf8ToBase64('hello')` returns the same result as `btoa('hello')`. The difference only appears when the input contains non-ASCII characters."
+    },
+    {
+      "type": "h3",
+      "text": "Should I use Buffer or TextEncoder?"
+    },
+    {
+      "type": "p",
+      "text": "Use `Buffer` in Node.js. Use `TextEncoder` and `TextDecoder` in browsers and in environments that follow the web platform APIs, such as Deno and Bun. The output is the same when both use UTF-8."
+    }
+  ]
+}
